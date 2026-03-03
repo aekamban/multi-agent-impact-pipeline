@@ -1,6 +1,14 @@
--- TCImpact POC Database Schema
--- All student data is anonymized. Teacher names are hashed.
--- Created: 2025-02-27
+-- TCImpact POC Database Schema v2
+-- Longitudinal learning companion for TCI teachers and students
+-- Supports three phases: Planning → Implementation → Analysis
+-- Updated: Day 2 based on real Jotform data analysis + Kate Keefer input
+-- 
+-- KEY DESIGN DECISIONS:
+-- 1. Sessions are the central unit (one teacher + one lab + one academic year)
+-- 2. Planning data is mutable until implementation starts, then locks
+-- 3. Student groups are anonymous — linked to sessions via classroom code only
+-- 4. Upsert pattern used throughout planning phase to avoid duplicate records
+-- 5. Map export JSON built into projects for Moore Foundation integration
 
 -- ─────────────────────────────────────────
 -- LOOKUP TABLES
@@ -8,159 +16,317 @@
 
 CREATE TABLE IF NOT EXISTS learning_labs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    -- Canonical name (what we use internally)
     lab_name TEXT NOT NULL UNIQUE,
     track TEXT NOT NULL CHECK(track IN ('A', 'B')),
-    -- Track A = En-ROADS (quantitative carbon target)
-    -- Track B = all other labs (awareness/community/policy)
-    carbon_target_lbs REAL,         -- 10000 for Track A, NULL for Track B
+    carbon_target_lbs REAL,
     thematic_topic TEXT,
+    -- Real usage frequency from Jotform data (informs default suggestions)
+    usage_count INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Pre-populate learning labs
-INSERT OR IGNORE INTO learning_labs (lab_name, track, carbon_target_lbs, thematic_topic) VALUES
-    ('Climate Impacts and Solutions with En-ROADS', 'A', 10000, 'Climate Solutions & Modeling'),
-    ('Renewable Energy', 'B', NULL, 'Energy'),
-    ('Agriculture', 'B', NULL, 'Food & Land Use'),
-    ('Sea Level Rise', 'B', NULL, 'Climate Impacts'),
-    ('Wildfires', 'B', NULL, 'Climate Impacts'),
-    ('Floods & Droughts', 'B', NULL, 'Climate Impacts'),
-    ('Invasive Species', 'B', NULL, 'Ecosystems'),
-    ('Civics & Climate Action', 'B', NULL, 'Policy & Civic Action'),
-    ('Climate Justice and Equity', 'B', NULL, 'Justice & Equity'),
-    ('Climate Migration', 'B', NULL, 'Justice & Equity'),
-    ('Climate Change and Health', 'B', NULL, 'Health');
+-- Canonical lab names + real-world alias mapping
+INSERT OR IGNORE INTO learning_labs 
+    (lab_name, track, carbon_target_lbs, thematic_topic, usage_count) 
+VALUES
+    ('Climate Impacts and Solutions with En-ROADS','A',10000,'Climate Solutions & Modeling',4),
+    ('Agriculture and Climate Change','B',NULL,'Food & Land Use',17),
+    ('Civics Climate Action','B',NULL,'Policy & Civic Action',12),
+    ('Climate Justice and Equity','B',NULL,'Justice & Equity',10),
+    ('Renewable Energy','B',NULL,'Energy',7),
+    ('Wildfires','B',NULL,'Climate Impacts',4),
+    ('Floods and Droughts','B',NULL,'Climate Impacts',3),
+    ('Sea Level Rise','B',NULL,'Climate Impacts',3),
+    ('Invasive Species','B',NULL,'Ecosystems',1),
+    ('Climate Change and Health','B',NULL,'Health',0),
+    ('Climate Migration','B',NULL,'Justice & Equity',0);
+
+-- Lab name aliases from real Jotform submissions
+-- Agent 2 uses this table for fuzzy matching
+CREATE TABLE IF NOT EXISTS lab_name_aliases (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    alias TEXT NOT NULL UNIQUE,        -- as submitted by teacher
+    canonical_lab_id INTEGER NOT NULL REFERENCES learning_labs(id),
+    confidence REAL DEFAULT 1.0        -- 1.0 = exact, <1.0 = fuzzy match
+);
+
+INSERT OR IGNORE INTO lab_name_aliases (alias, canonical_lab_id, confidence)
+SELECT 'Agriculture and Climate Change', id, 1.0 FROM learning_labs WHERE lab_name = 'Agriculture and Climate Change';
+INSERT OR IGNORE INTO lab_name_aliases (alias, canonical_lab_id, confidence)
+SELECT 'Climate Impacts and Solutions with En-ROADS', id, 1.0 FROM learning_labs WHERE lab_name = 'Climate Impacts and Solutions with En-ROADS';
+INSERT OR IGNORE INTO lab_name_aliases (alias, canonical_lab_id, confidence)
+SELECT 'Civics Climate Action', id, 1.0 FROM learning_labs WHERE lab_name = 'Civics Climate Action';
+INSERT OR IGNORE INTO lab_name_aliases (alias, canonical_lab_id, confidence)
+SELECT 'Climate Justice and Equity', id, 1.0 FROM learning_labs WHERE lab_name = 'Climate Justice and Equity';
+INSERT OR IGNORE INTO lab_name_aliases (alias, canonical_lab_id, confidence)
+SELECT 'Renewable Energy', id, 1.0 FROM learning_labs WHERE lab_name = 'Renewable Energy';
+INSERT OR IGNORE INTO lab_name_aliases (alias, canonical_lab_id, confidence)
+SELECT 'Sustainability and greening', id, 0.7 FROM learning_labs WHERE lab_name = 'Agriculture and Climate Change';
+INSERT OR IGNORE INTO lab_name_aliases (alias, canonical_lab_id, confidence)
+SELECT 'Invasive Species', id, 1.0 FROM learning_labs WHERE lab_name = 'Invasive Species';
+INSERT OR IGNORE INTO lab_name_aliases (alias, canonical_lab_id, confidence)
+SELECT 'Floods and Droughts', id, 1.0 FROM learning_labs WHERE lab_name = 'Floods and Droughts';
+INSERT OR IGNORE INTO lab_name_aliases (alias, canonical_lab_id, confidence)
+SELECT 'Sea Level Rise', id, 1.0 FROM learning_labs WHERE lab_name = 'Sea Level Rise';
+INSERT OR IGNORE INTO lab_name_aliases (alias, canonical_lab_id, confidence)
+SELECT 'Wildfires', id, 1.0 FROM learning_labs WHERE lab_name = 'Wildfires';
 
 CREATE TABLE IF NOT EXISTS project_types (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     type_name TEXT NOT NULL UNIQUE,
-    track_relevance TEXT NOT NULL CHECK(track_relevance IN ('A', 'B', 'both')),
-    carbon_quantifiable INTEGER NOT NULL DEFAULT 0  -- 1 = yes, 0 = no
+    track_relevance TEXT NOT NULL CHECK(track_relevance IN ('A','B','both')),
+    carbon_quantifiable INTEGER NOT NULL DEFAULT 0
 );
 
 INSERT OR IGNORE INTO project_types (type_name, track_relevance, carbon_quantifiable) VALUES
-    ('Energy reduction/efficiency', 'A', 1),
-    ('Renewable energy installation', 'A', 1),
-    ('Tree planting / reforestation', 'both', 1),
-    ('Composting program', 'both', 1),
-    ('Food waste reduction', 'both', 1),
-    ('Transportation behavior change', 'both', 1),
-    ('Recycling program', 'both', 1),
-    ('School garden', 'both', 0),
-    ('Community garden', 'B', 0),
-    ('Awareness / communications campaign', 'B', 0),
-    ('Policy advocacy / letter writing', 'B', 0),
-    ('Habitat restoration', 'B', 0),
-    ('Invasive species removal', 'B', 0),
-    ('Youth engagement project', 'B', 0),
-    ('Other', 'both', 0);
+    ('Energy reduction/efficiency','A',1),
+    ('Renewable energy installation','A',1),
+    ('Tree planting / reforestation','both',1),
+    ('Composting program','both',1),
+    ('Food waste reduction','both',1),
+    ('Transportation behavior change','both',1),
+    ('Recycling program','both',1),
+    ('School/community garden','both',0),
+    ('Awareness / communications campaign','B',0),
+    ('Policy advocacy / letter writing','B',0),
+    ('Habitat restoration / invasive species removal','B',0),
+    ('Environmental trail / outdoor classroom','B',0),
+    ('Nature journaling / citizen science','B',0),
+    ('Youth engagement / club','B',0),
+    ('Curriculum integration / life cycle analysis','B',0),
+    ('Other','both',0);
 
 -- ─────────────────────────────────────────
--- CORE TABLES
+-- TEACHERS
 -- ─────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS teachers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    -- Name is hashed for privacy; email hash used as stable identifier
     name_hash TEXT NOT NULL UNIQUE,
     email_hash TEXT NOT NULL UNIQUE,
-    school_name TEXT,               -- not hashed — used for deduplication
-    school_locale TEXT CHECK(school_locale IN ('urban', 'suburban', 'rural', 'unknown')),
-    title1_status TEXT CHECK(title1_status IN ('yes', 'no', 'unknown')),
-    country TEXT NOT NULL DEFAULT 'unknown',
+    school_name TEXT,
+    -- Demographics TCI wants but doesn't currently collect systematically
+    school_type TEXT CHECK(school_type IN (
+        'public','private','charter','montessori',
+        'community_org','tribal_school','international','other','unknown'
+    )) DEFAULT 'unknown',
+    school_locale TEXT CHECK(school_locale IN (
+        'urban','suburban','rural','unknown'
+    )) DEFAULT 'unknown',
+    title1_status TEXT CHECK(title1_status IN (
+        'yes','no','unknown'
+    )) DEFAULT 'unknown',
+    -- Location (split for map integration)
+    city TEXT,
+    state_province TEXT,
+    country TEXT DEFAULT 'unknown',
+    -- Teaching context
     grade_band TEXT CHECK(grade_band IN (
-        'elementary', 'middle', 'high', 'mixed', 'unknown'
-    )),
-    num_students_typical INTEGER,   -- typical class/cohort size
-    lab_used_most TEXT REFERENCES learning_labs(lab_name),
+        'elementary','middle','high','mixed','unknown'
+    )) DEFAULT 'unknown',
+    subject_area TEXT,              -- e.g. "Environmental Science, Biology"
+    num_students_typical INTEGER,
+    -- TCI relationship
+    tci_educator_id TEXT,           -- if TCI provides one in future
+    years_using_tci INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS projects (
+-- ─────────────────────────────────────────────────────────────────────────────
+-- SESSIONS  (core unit: one teacher + one lab + one academic year)
+-- This is the mutable planning record that locks when implementation begins
+-- ─────────────────────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     teacher_id INTEGER NOT NULL REFERENCES teachers(id),
+    lab_id INTEGER REFERENCES learning_labs(id),
+    classroom_code TEXT UNIQUE NOT NULL,  -- e.g. "TCI-7X4K"
+    academic_year TEXT,                   -- e.g. "2024-25"
+
+    -- Phase tracking (planning data is mutable until 'implementing')
+    status TEXT NOT NULL CHECK(status IN (
+        'planning','implementing','analyzing','complete'
+    )) DEFAULT 'planning',
+
+    -- Planning phase fields (mutable, overwritten as teacher refines)
+    planned_num_groups INTEGER DEFAULT 1,
+    planned_start_date DATE,
+    planned_end_date DATE,
+    planned_duration_weeks INTEGER,
+    curriculum_alignment TEXT,      -- how teacher connects lab to their course
+    local_context TEXT,             -- local environmental issues informing choice
+    available_resources TEXT,       -- field trips, tech, community partners etc.
+    teacher_notes TEXT,
+
+    -- Implementation tracking
+    implementation_started_at TIMESTAMP,
+    implementation_notes TEXT,
+
+    -- Analysis / completion
+    completed_at TIMESTAMP,
+    jotform_draft_text TEXT,        -- AI-drafted Jotform submission
+    jotform_submitted INTEGER DEFAULT 0,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ─────────────────────────────────────────
+-- STUDENT GROUPS (anonymous, linked to sessions)
+-- ─────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS student_groups (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id INTEGER NOT NULL REFERENCES sessions(id),
+    group_name TEXT,                -- e.g. "Group A" or student-chosen name
+    num_students INTEGER,
+    -- Ability/context flags (set by teacher, informs agent suggestions)
+    ability_level TEXT CHECK(ability_level IN (
+        'mixed','advanced','grade_level','support_needed','unknown'
+    )) DEFAULT 'unknown',
+    has_field_trip_access INTEGER DEFAULT 0,
+    has_device_access INTEGER DEFAULT 1,
+    special_interests TEXT,         -- e.g. "interested in marine biology"
+
+    -- Phase tracking (mirrors session but at group level)
+    status TEXT NOT NULL CHECK(status IN (
+        'planning','implementing','analyzing','complete'
+    )) DEFAULT 'planning',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ─────────────────────────────────────────
+-- PROJECTS (one per student group)
+-- ─────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS projects (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    group_id INTEGER NOT NULL REFERENCES student_groups(id),
+    session_id INTEGER NOT NULL REFERENCES sessions(id),
     lab_id INTEGER NOT NULL REFERENCES learning_labs(id),
     project_type_id INTEGER REFERENCES project_types(id),
-    track TEXT NOT NULL CHECK(track IN ('A', 'B')),
+    track TEXT NOT NULL CHECK(track IN ('A','B')),
 
-    -- Project description (free text — from Jotform or in-app input)
+    -- Core description
+    project_title TEXT,
     project_description TEXT,
-    num_students_involved INTEGER,
-    project_duration_weeks INTEGER,
+    thematic_topic TEXT,
 
-    -- Carbon impact (Track A primarily, optional for Track B)
+    -- Student count (normalized from messy input like "10-25, K-8th")
+    num_students_min INTEGER,
+    num_students_max INTEGER,
+    num_students_display TEXT,      -- original messy value preserved
+
+    -- Duration
+    duration_weeks INTEGER,
+    start_date DATE,
+    end_date DATE,
+
+    -- Carbon impact (Track A primarily)
     carbon_lbs_estimated REAL,
-    carbon_calculation_json TEXT,   -- stores methodology + assumptions as JSON
-    carbon_target_met INTEGER,      -- 1 = yes, 0 = no, NULL = not applicable
+    carbon_calculation_json TEXT,   -- methodology + assumptions as JSON
+    carbon_target_met INTEGER,      -- 1=yes, 0=no, NULL=not applicable
 
-    -- Community impact score (Agent 4 output)
-    community_score_total REAL,     -- 0-20 (sum of 4 dimensions x 5)
-    community_score_json TEXT,      -- breakdown by dimension as JSON
+    -- Community impact
+    community_score_total REAL,
+    community_score_json TEXT,      -- {reach, depth, equity, sustainability}
+    people_reached INTEGER,
+    people_reached_display TEXT,    -- e.g. "500+" preserved as submitted
 
-    -- Rubric scores (Agent 2 output) — 5 dimensions, each 1-5
+    -- Community partnerships (extracted from narrative by Agent 2)
+    community_partnerships_json TEXT,   -- [{name, type, description}]
+    community_partnerships_count INTEGER DEFAULT 0,
+
+    -- Rubric scores (5 dimensions, 1-5 each)
     rubric_score_json TEXT,         -- {reach, depth, equity, sustainability, fidelity}
-    rubric_total REAL,              -- sum 5-25
+    rubric_total REAL,              -- 5-25
 
-    -- Funder-facing fields
-    people_reached INTEGER,         -- estimated community members reached
-    sustained_action INTEGER,       -- 1 = project continues beyond class, 0 = no
-    equity_flag INTEGER,            -- 1 = serves underserved community
+    -- Funder-facing flags
+    sustained_action INTEGER,       -- 1=continues beyond class
+    equity_flag INTEGER,            -- 1=serves underserved community
 
-    -- Follow-up tracking
-    followup_date DATE,             -- 3 months after submission
-    followup_completed INTEGER DEFAULT 0,
-    followup_notes TEXT,
+    -- Supporting evidence
+    student_quotes TEXT,
+    highlights TEXT,
+    media_urls TEXT,                -- newline-separated URLs from Jotform
 
-    -- Agent-generated funder summary
+    -- Phase tracking
+    status TEXT NOT NULL CHECK(status IN (
+        'planning','implementing','analyzing','complete'
+    )) DEFAULT 'planning',
+
+    -- Agent outputs
     funder_summary_text TEXT,
     logic_model_json TEXT,
 
-    -- Source tracking
+    -- Moore Foundation map export
+    map_export_json TEXT,           -- {lat, lng, project_type, lab, grade_band, ...}
+
+    -- Follow-up
+    followup_date DATE,
+    followup_completed INTEGER DEFAULT 0,
+    followup_notes TEXT,
+
+    -- Source
     submission_source TEXT CHECK(submission_source IN (
-        'in_app', 'jotform_import', 'manual'
+        'in_app','jotform_import','manual'
     )) DEFAULT 'in_app',
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- ─────────────────────────────────────────
+-- PRE/POST TEACHER SURVEYS
+-- ─────────────────────────────────────────
+
 CREATE TABLE IF NOT EXISTS pre_post_surveys (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     teacher_id INTEGER NOT NULL REFERENCES teachers(id),
+    session_id INTEGER REFERENCES sessions(id),
     lab_id INTEGER REFERENCES learning_labs(id),
-    survey_type TEXT NOT NULL CHECK(survey_type IN ('pre', 'post')),
+    survey_type TEXT NOT NULL CHECK(survey_type IN ('pre','post')),
 
-    -- Core outcome metrics funders care about
+    -- Core outcome metrics
     confidence_score INTEGER CHECK(confidence_score BETWEEN 1 AND 5),
-    -- "How confident are you teaching climate content?"
     preparedness_score INTEGER CHECK(preparedness_score BETWEEN 1 AND 5),
-    -- "How prepared do you feel to facilitate this learning lab?"
     implementation_frequency TEXT CHECK(implementation_frequency IN (
-        'this is my first time',
-        '1-2 times before',
-        '3-5 times before',
-        '6+ times'
+        'this is my first time','1-2 times before',
+        '3-5 times before','6+ times'
     )),
+    -- Post-only fields
     student_engagement_score INTEGER CHECK(student_engagement_score BETWEEN 1 AND 5),
-    -- "How engaged were your students?" (post only)
     would_recommend INTEGER CHECK(would_recommend BETWEEN 1 AND 5),
-    -- Net promoter proxy (post only)
-    open_feedback TEXT,             -- optional free text
 
+    -- Planning context (pre-survey only — informs agent suggestions)
+    student_ability_context TEXT,
+    available_resources_text TEXT,
+    local_issue_context TEXT,
+
+    open_feedback TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ─────────────────────────────────────────
+-- IMPACT SUMMARIES (funder dashboard + map export)
+-- ─────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS impact_summaries (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     date_range_start DATE,
     date_range_end DATE,
-    filter_country TEXT,            -- NULL = all countries
-    filter_lab TEXT,                -- NULL = all labs
-    filter_locale TEXT,             -- NULL = all locales
+    filter_country TEXT,
+    filter_lab TEXT,
+    filter_locale TEXT,
+    filter_school_type TEXT,
 
-    -- Aggregate output metrics
+    -- Output metrics (EPA logic model: outputs)
     total_teachers INTEGER,
     total_students INTEGER,
     total_projects INTEGER,
@@ -168,39 +334,48 @@ CREATE TABLE IF NOT EXISTS impact_summaries (
     countries_represented INTEGER,
     pct_title1_schools REAL,
     pct_underserved_projects REAL,
+    total_community_partnerships INTEGER,
 
-    -- Aggregate outcome metrics
+    -- Outcome metrics (short-term)
     avg_pre_confidence REAL,
     avg_post_confidence REAL,
-    confidence_delta REAL,          -- post - pre
+    confidence_delta REAL,
     avg_pre_preparedness REAL,
     avg_post_preparedness REAL,
     preparedness_delta REAL,
 
-    -- Impact metrics
-    total_carbon_lbs REAL,          -- Track A only
+    -- Outcome metrics (intermediate)
+    total_carbon_lbs REAL,
     avg_community_score REAL,
     avg_rubric_score REAL,
     pct_projects_sustained REAL,
 
     -- Generated artifacts
-    summary_json TEXT,              -- full breakdown for dashboard
-    logic_model_text TEXT,          -- grant-ready narrative
+    summary_json TEXT,
+    logic_model_text TEXT,
+    map_export_json TEXT,           -- all projects in Moore Foundation format
     generated_by TEXT DEFAULT 'agent-4'
 );
 
 -- ─────────────────────────────────────────
--- INDEXES (for common dashboard queries)
+-- INDEXES
 -- ─────────────────────────────────────────
 
-CREATE INDEX IF NOT EXISTS idx_projects_teacher ON projects(teacher_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_teacher ON sessions(teacher_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_lab ON sessions(lab_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_code ON sessions(classroom_code);
+CREATE INDEX IF NOT EXISTS idx_sessions_status ON sessions(status);
+CREATE INDEX IF NOT EXISTS idx_groups_session ON student_groups(session_id);
+CREATE INDEX IF NOT EXISTS idx_projects_group ON projects(group_id);
+CREATE INDEX IF NOT EXISTS idx_projects_session ON projects(session_id);
 CREATE INDEX IF NOT EXISTS idx_projects_lab ON projects(lab_id);
 CREATE INDEX IF NOT EXISTS idx_projects_track ON projects(track);
-CREATE INDEX IF NOT EXISTS idx_projects_created ON projects(created_at);
+CREATE INDEX IF NOT EXISTS idx_projects_status ON projects(status);
 CREATE INDEX IF NOT EXISTS idx_projects_followup ON projects(followup_date, followup_completed);
 CREATE INDEX IF NOT EXISTS idx_teachers_country ON teachers(country);
 CREATE INDEX IF NOT EXISTS idx_teachers_locale ON teachers(school_locale);
-CREATE INDEX IF NOT EXISTS idx_teachers_title1 ON teachers(title1_status);
+CREATE INDEX IF NOT EXISTS idx_teachers_type ON teachers(school_type);
 CREATE INDEX IF NOT EXISTS idx_surveys_teacher ON pre_post_surveys(teacher_id);
-CREATE INDEX IF NOT EXISTS idx_surveys_type ON pre_post_surveys(survey_type);
+CREATE INDEX IF NOT EXISTS idx_surveys_session ON pre_post_surveys(session_id);
+CREATE INDEX IF NOT EXISTS idx_aliases_alias ON lab_name_aliases(alias);
 
