@@ -130,6 +130,8 @@ CREATE TABLE IF NOT EXISTS teachers (
     -- TCI relationship
     tci_educator_id TEXT,           -- if TCI provides one in future
     years_using_tci INTEGER DEFAULT 0,
+    curriculum_standard TEXT DEFAULT 'NGSS',
+    preferred_language TEXT DEFAULT 'en',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -144,7 +146,9 @@ CREATE TABLE IF NOT EXISTS sessions (
     teacher_id INTEGER NOT NULL REFERENCES teachers(id),
     lab_id INTEGER REFERENCES learning_labs(id),
     classroom_code TEXT UNIQUE NOT NULL,  -- e.g. "TCI-7X4K"
-    academic_year TEXT,                   -- e.g. "2024-25"
+    academic_year TEXT,                   -- e.g. "2026-27"
+    curriculum_standard TEXT DEFAULT 'NGSS',
+    session_language TEXT DEFAULT 'en',
 
     -- Phase tracking (planning data is mutable until 'implementing')
     status TEXT NOT NULL CHECK(status IN (
