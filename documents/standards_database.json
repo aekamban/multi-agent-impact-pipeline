@@ -1,0 +1,1284 @@
+{
+  "metadata": {
+    "title": "TCImpact Standards Alignment Database",
+    "description": "Multi-system curriculum standards mapped to all 11 TCI Learning Labs. Used by Agent 1 curriculum alignment mode.",
+    "version": "1.0.0",
+    "generated_date": "2026-03-04",
+    "ai_knowledge_cutoff": "GPT-5.2, March 4 2026. Standards reflect best available knowledge at that date only.",
+    "accuracy_warning": "Standards change. This file must be reviewed annually before each academic year. See maintenance_schedule for update instructions. Do not cite specific standard codes to teachers without verifying current adoption status in their state or country.",
+    "official_sources": {
+      "US_NGSS": "https://www.nextgenscience.org/",
+      "US_CCSS": "https://www.corestandards.org/",
+      "US_C3": "https://www.socialstudies.org/standards/c3",
+      "US_NCTM": "https://www.nctm.org/standards/",
+      "US_CSTA": "https://www.csteachers.org/page/standards",
+      "US_ISTE": "https://www.iste.org/standards/iste-standards-for-students",
+      "US_NHES": "https://www.cdc.gov/healthyschools/sher/standards/index.htm",
+      "US_NCAS": "https://www.nationalartsstandards.org/",
+      "US_ACTFL": "https://www.actfl.org/resources/world-readiness-standards-learning-languages",
+      "US_AP": "https://apcentral.collegeboard.org/courses",
+      "IB_all": "https://www.ibo.org/programmes/",
+      "UK_DfE": "https://www.gov.uk/national-curriculum",
+      "UK_AQA": "https://www.aqa.org.uk/",
+      "UK_OCR": "https://www.ocr.org.uk/",
+      "UK_Edexcel": "https://qualifications.pearson.com/",
+      "Cambridge": "https://www.cambridgeinternational.org/"
+    },
+    "maintenance_schedule": {
+      "frequency": "Annual \u2014 review each August before the new academic year starts",
+      "owner": "TCI Data Scientist or designated educator reviewer",
+      "estimated_time": "2-4 hours per full review cycle",
+      "what_to_check": {
+        "US": [
+          "NGSS: Stable since 2013 but STATE ADOPTION VARIES. Texas uses TEKS, Virginia uses SOLs \u2014 check state_standards_note column per teacher location before citing codes.",
+          "CCSS ELA and Math: Stable but politically contested in some states \u2014 verify state adoption.",
+          "AP Course Descriptions: Updated by College Board ANNUALLY each fall. Always check apcentral.collegeboard.org for current CED before citing AP unit hooks.",
+          "CSTA K-12 CS Standards: Last major update 2017, minor revisions ongoing.",
+          "ISTE Student Standards: Updated 2016 \u2014 check iste.org for any revisions."
+        ],
+        "IB": [
+          "IB uses frameworks and criteria, not numbered codes \u2014 alignment is more stable than US code-based standards.",
+          "MYP Subject Guides: Updated approx every 5-7 years. Estimated next MYP review cycle ~2027.",
+          "DP ESS Guide: Last updated 2015 (first assessment 2017). Check ibo.org for any new edition.",
+          "DP Geography: Check current syllabus year at ibo.org.",
+          "PYP: Major enhancement 2018 \u2014 verify any PYP content against current PYP framework document."
+        ],
+        "UK": [
+          "COVERS ENGLAND ONLY. Scotland=CfE, Wales=Curriculum for Wales, NI=separate. Do not apply UK table to non-England schools.",
+          "National Curriculum programmes of study: Updated approx every 3-5 years. Check gov.uk/national-curriculum.",
+          "GCSE Specs: Rolling ~5-year update cycle per exam board. Always ask teacher which board (AQA/OCR/Edexcel/WJEC) before citing spec-specific content.",
+          "A Level Specs: Same rolling cycle. Check individual board websites for current spec year.",
+          "RSE and computing curriculum under review as of 2025 \u2014 check DfE for updates."
+        ],
+        "Cambridge": [
+          "Syllabuses updated on rolling 5-year cycle per subject. Verify current syllabus year at cambridgeinternational.org before citing content points.",
+          "Global Perspectives framework is relatively stable \u2014 research, collaboration, communication skills.",
+          "Cambridge Primary/Lower Secondary frameworks updated 2020-2022 \u2014 verify if working with older teacher materials."
+        ]
+      },
+      "update_process": [
+        "1. Check each official_source URL above for any published updates",
+        "2. Edit the relevant CSV file in documents/standards/ (one file per system)",
+        "3. Increment version number (e.g. 1.0.0 to 1.1.0) and update generated_date in this JSON",
+        "4. Add an entry to the change_log array below",
+        "5. Run: python3 tests/test_standards_alignment.py to verify all mappings intact",
+        "6. Commit with: git commit -m 'standards: annual review YYYY-MM'",
+        "7. Notify TCI team that standards database has been updated"
+      ],
+      "change_log": [
+        {
+          "version": "1.0.0",
+          "date": "2026-03-04",
+          "author": "GPT-5.2 + Abi Kambanis",
+          "notes": "Initial generation. Covers US full K-12 progression including AP, IB (PYP/MYP/DP), UK England (KS2-A Level), Cambridge International (Primary through AS/A Level). Knowledge cutoff March 4 2026."
+        }
+      ]
+    },
+    "coverage": {
+      "systems_covered": [
+        "US: NGSS, CCSS ELA, CCSS Math, C3, NCTM, CSTA, ISTE, NHES, NCAS, ACTFL, AP (full K-12 + AP progression)",
+        "IB: PYP, MYP, DP (ESS, Geography, Biology, Chemistry, Global Politics, TOK/EE/CAS)",
+        "UK: KS2, KS3, GCSE, A Level (England only)",
+        "Cambridge International: Primary, Lower Secondary, IGCSE, AS/A Level, Global Perspectives"
+      ],
+      "systems_planned_next": [
+        "Australian ACARA (high priority \u2014 significant TCI educator base)",
+        "Canadian Provincial: BC and Ontario curricula",
+        "South African CAPS",
+        "French Baccalaur\u00e9at",
+        "Welsh Curriculum for Wales (separate from England \u2014 already using UK table incorrectly if applied to Wales)"
+      ],
+      "languages": "English only. POC scope. TCI labs available in up to 9 languages \u2014 multilingual standards alignment planned for production.",
+      "labs_covered": 11,
+      "grade_range": "Ages 5-19 (Primary through pre-university across all systems)"
+    }
+  },
+  "routing": {
+    "description": "Routing patterns for Agent 1 teacher curriculum alignment. Maps natural teacher inputs to standards tables and likely learning labs.",
+    "version": "1.0.0",
+    "tables": {
+      "US": "learning_labs_US_standards_full_progression.csv",
+      "IB": "learning_labs_IB_standards.csv",
+      "UK": "learning_labs_UK_standards_with_KS2_KS3.csv",
+      "Cambridge": "learning_labs_cambridge_standards.csv"
+    },
+    "patterns": [
+      {
+        "id": "US_GRADE_5_SCI",
+        "examples": [
+          "I teach 5th grade science",
+          "5th grade science teacher",
+          "Grade 5 science"
+        ],
+        "match": {
+          "type": "regex_any",
+          "patterns": [
+            "\\b(5th|grade\\s*5)\\b.*\\bscience\\b",
+            "\\b(grade\\s*5|5th)\\b"
+          ]
+        },
+        "normalized": {
+          "curriculum_system": "US",
+          "stage": "3-5",
+          "subjects": [
+            "Science"
+          ]
+        },
+        "tables_to_query": [
+          "learning_labs_US_standards_full_progression.csv"
+        ],
+        "filters": {
+          "US Grade Bands": [
+            "3-5"
+          ]
+        },
+        "recommended_labs": [
+          "Invasive Species",
+          "Floods & Droughts",
+          "Sea Level Rise",
+          "Agriculture & Climate Change"
+        ],
+        "routing_notes": "Use US table; emphasize NGSS MS/ES + CCSS ELA K-8 + CCSS Math domains for 3-5.",
+        "confidence": 0.86
+      },
+      {
+        "id": "US_MIDDLE_SCHOOL_SCI",
+        "examples": [
+          "I teach middle school science",
+          "6th grade science",
+          "7th grade science",
+          "8th grade science"
+        ],
+        "match": {
+          "type": "regex_any",
+          "patterns": [
+            "\\b(middle\\s*school|6th|7th|8th|grade\\s*6|grade\\s*7|grade\\s*8)\\b.*\\bscience\\b"
+          ]
+        },
+        "normalized": {
+          "curriculum_system": "US",
+          "stage": "6-8",
+          "subjects": [
+            "Science"
+          ]
+        },
+        "tables_to_query": [
+          "learning_labs_US_standards_full_progression.csv"
+        ],
+        "filters": {
+          "US Grade Bands": [
+            "6-8"
+          ]
+        },
+        "recommended_labs": [
+          "Floods & Droughts",
+          "Wildfires",
+          "Sea Level Rise",
+          "En-ROADS Climate Modeling",
+          "Invasive Species"
+        ],
+        "routing_notes": "Use NGSS MS/ES and keep math domains + CCSS ELA K-8 for literacy tasks.",
+        "confidence": 0.88
+      },
+      {
+        "id": "US_HIGH_SCHOOL_BIO",
+        "examples": [
+          "I teach high school biology",
+          "9th grade biology",
+          "Bio teacher 10th grade"
+        ],
+        "match": {
+          "type": "regex_any",
+          "patterns": [
+            "\\b(high\\s*school|9th|10th|11th|12th|grade\\s*9|grade\\s*10|grade\\s*11|grade\\s*12)\\b.*\\b(biology|bio)\\b",
+            "\\bbiology\\b.*\\b(high\\s*school|secondary)\\b"
+          ]
+        },
+        "normalized": {
+          "curriculum_system": "US",
+          "stage": "9-12",
+          "subjects": [
+            "Biology"
+          ]
+        },
+        "tables_to_query": [
+          "learning_labs_US_standards_full_progression.csv"
+        ],
+        "filters": {
+          "US Grade Bands": [
+            "9-10",
+            "11-12"
+          ]
+        },
+        "recommended_labs": [
+          "Invasive Species",
+          "Climate Change & Health",
+          "Agriculture & Climate Change",
+          "Wildfires"
+        ],
+        "routing_notes": "Prioritize NGSS HS life science PEs and AP course fit if requested.",
+        "confidence": 0.9
+      },
+      {
+        "id": "US_APES",
+        "examples": [
+          "AP Environmental Science",
+          "I teach APES",
+          "AP Env Sci"
+        ],
+        "match": {
+          "type": "regex_any",
+          "patterns": [
+            "\\bAP(ES)?\\b.*\\b(environmental|env)\\b",
+            "\\bAPES\\b",
+            "\\bAP\\s*Environmental\\s*Science\\b"
+          ]
+        },
+        "normalized": {
+          "curriculum_system": "US",
+          "stage": "AP",
+          "subjects": [
+            "Environmental Science"
+          ]
+        },
+        "tables_to_query": [
+          "learning_labs_US_standards_full_progression.csv"
+        ],
+        "filters": {
+          "AP Course Fit": [
+            "AP Environmental Science"
+          ]
+        },
+        "recommended_labs": [
+          "En-ROADS Climate Modeling",
+          "Renewable Energy",
+          "Sea Level Rise",
+          "Floods & Droughts",
+          "Wildfires",
+          "Agriculture & Climate Change",
+          "Climate Justice & Equity"
+        ],
+        "routing_notes": "Use AP Course Fit + AP Unit/Skill Hooks when available; keep NGSS HS as supportive justification.",
+        "confidence": 0.93
+      },
+      {
+        "id": "US_AP_HUG",
+        "examples": [
+          "AP Human Geography",
+          "AP HUG",
+          "I teach AP HuG"
+        ],
+        "match": {
+          "type": "regex_any",
+          "patterns": [
+            "\\bAP\\b.*\\bHuman\\s*Geography\\b",
+            "\\bAP\\s*HuG\\b",
+            "\\bHUG\\b"
+          ]
+        },
+        "normalized": {
+          "curriculum_system": "US",
+          "stage": "AP",
+          "subjects": [
+            "Human Geography"
+          ]
+        },
+        "tables_to_query": [
+          "learning_labs_US_standards_full_progression.csv"
+        ],
+        "filters": {
+          "AP Course Fit": [
+            "AP Human Geography"
+          ]
+        },
+        "recommended_labs": [
+          "Climate Migration",
+          "Climate Justice & Equity",
+          "Sea Level Rise",
+          "Floods & Droughts",
+          "Civics & Climate Action"
+        ],
+        "routing_notes": "Frame around population, migration, land use, development, and human-environment interaction.",
+        "confidence": 0.9
+      },
+      {
+        "id": "US_AP_STATS",
+        "examples": [
+          "AP Statistics",
+          "I teach AP Stats",
+          "AP Stat"
+        ],
+        "match": {
+          "type": "regex_any",
+          "patterns": [
+            "\\bAP\\b.*\\bStat",
+            "\\bAP\\s*Statistics\\b",
+            "\\bAP\\s*Stats\\b"
+          ]
+        },
+        "normalized": {
+          "curriculum_system": "US",
+          "stage": "AP",
+          "subjects": [
+            "Statistics/Math"
+          ]
+        },
+        "tables_to_query": [
+          "learning_labs_US_standards_full_progression.csv"
+        ],
+        "filters": {
+          "AP Course Fit": [
+            "AP Statistics"
+          ]
+        },
+        "recommended_labs": [
+          "En-ROADS Climate Modeling",
+          "Wildfires",
+          "Floods & Droughts",
+          "Sea Level Rise",
+          "Climate Change & Health"
+        ],
+        "routing_notes": "Emphasize datasets, distributions, trend/association, inference framing, and communication.",
+        "confidence": 0.89
+      },
+      {
+        "id": "IB_PYP",
+        "examples": [
+          "IB PYP",
+          "PYP class",
+          "I teach PYP"
+        ],
+        "match": {
+          "type": "regex_any",
+          "patterns": [
+            "\\bIB\\b.*\\bPYP\\b",
+            "\\bPYP\\b"
+          ]
+        },
+        "normalized": {
+          "curriculum_system": "IB",
+          "stage": "PYP",
+          "subjects": [
+            "Transdisciplinary"
+          ]
+        },
+        "tables_to_query": [
+          "learning_labs_IB_standards.csv"
+        ],
+        "filters": {
+          "PYP Themes": [
+            "Sharing the Planet",
+            "How the World Works"
+          ]
+        },
+        "recommended_labs": [
+          "Invasive Species",
+          "Floods & Droughts",
+          "Sea Level Rise",
+          "Renewable Energy",
+          "Agriculture & Climate Change"
+        ],
+        "routing_notes": "Use PYP Themes; keep language simple; include action as learner agency.",
+        "confidence": 0.84
+      },
+      {
+        "id": "IB_MYP_DESIGN",
+        "examples": [
+          "IB MYP Design",
+          "MYP Design teacher",
+          "I teach Design in MYP"
+        ],
+        "match": {
+          "type": "regex_any",
+          "patterns": [
+            "\\bIB\\b.*\\bMYP\\b.*\\bDesign\\b",
+            "\\bMYP\\b.*\\bDesign\\b"
+          ]
+        },
+        "normalized": {
+          "curriculum_system": "IB",
+          "stage": "MYP",
+          "subjects": [
+            "Design"
+          ]
+        },
+        "tables_to_query": [
+          "learning_labs_IB_standards.csv"
+        ],
+        "filters": {
+          "MYP Subjects": [
+            "Design"
+          ]
+        },
+        "recommended_labs": [
+          "Renewable Energy",
+          "Floods & Droughts",
+          "Sea Level Rise",
+          "En-ROADS Climate Modeling"
+        ],
+        "routing_notes": "Emphasize design cycle: identify need, criteria, prototype, test/iterate; tie to global contexts.",
+        "confidence": 0.92
+      },
+      {
+        "id": "IB_DP_ESS",
+        "examples": [
+          "IB DP ESS",
+          "IB Environmental Systems and Societies",
+          "DP ESS teacher"
+        ],
+        "match": {
+          "type": "regex_any",
+          "patterns": [
+            "\\bDP\\b.*\\b(ESS|Environmental\\s*Systems)\\b",
+            "\\bEnvironmental\\s*Systems\\s*and\\s*Societies\\b"
+          ]
+        },
+        "normalized": {
+          "curriculum_system": "IB",
+          "stage": "DP",
+          "subjects": [
+            "ESS"
+          ]
+        },
+        "tables_to_query": [
+          "learning_labs_IB_standards.csv"
+        ],
+        "filters": {
+          "DP Subjects": [
+            "Environmental Systems & Societies"
+          ]
+        },
+        "recommended_labs": [
+          "En-ROADS Climate Modeling",
+          "Climate Justice & Equity",
+          "Renewable Energy",
+          "Agriculture & Climate Change",
+          "Sea Level Rise",
+          "Wildfires"
+        ],
+        "routing_notes": "Use DP subject group fit and explicitly suggest TOK/EE/CAS pathways.",
+        "confidence": 0.91
+      },
+      {
+        "id": "UK_KS2",
+        "examples": [
+          "KS2",
+          "Year 5",
+          "Year 6",
+          "upper primary"
+        ],
+        "match": {
+          "type": "regex_any",
+          "patterns": [
+            "\\bKS2\\b",
+            "\\bYear\\s*(5|6)\\b",
+            "\\bupper\\s*primary\\b"
+          ]
+        },
+        "normalized": {
+          "curriculum_system": "UK",
+          "stage": "KS2",
+          "subjects": [
+            "Primary"
+          ]
+        },
+        "tables_to_query": [
+          "learning_labs_UK_standards_with_KS2_KS3.csv"
+        ],
+        "filters": {
+          "KS2 Standards": [
+            "Science",
+            "Geography"
+          ]
+        },
+        "recommended_labs": [
+          "Invasive Species",
+          "Floods & Droughts",
+          "Sea Level Rise",
+          "Renewable Energy"
+        ],
+        "routing_notes": "Keep links broad to National Curriculum strands; emphasize enquiry and vocabulary development.",
+        "confidence": 0.83
+      },
+      {
+        "id": "UK_GCSE_GEOGRAPHY",
+        "examples": [
+          "GCSE Geography",
+          "I teach GCSE geo",
+          "KS4 Geography"
+        ],
+        "match": {
+          "type": "regex_any",
+          "patterns": [
+            "\\bGCSE\\b.*\\bGeograph",
+            "\\bKS4\\b.*\\bGeograph",
+            "\\bGCSE\\s*geo\\b"
+          ]
+        },
+        "normalized": {
+          "curriculum_system": "UK",
+          "stage": "GCSE",
+          "subjects": [
+            "Geography"
+          ]
+        },
+        "tables_to_query": [
+          "learning_labs_UK_standards_with_KS2_KS3.csv"
+        ],
+        "filters": {
+          "GCSE Subjects": [
+            "Geography"
+          ]
+        },
+        "recommended_labs": [
+          "Floods & Droughts",
+          "Sea Level Rise",
+          "Wildfires",
+          "Climate Migration",
+          "Climate Justice & Equity"
+        ],
+        "routing_notes": "Use GCSE hazards/coasts/urban & resource management case-study framing; highlight evaluation/extended writing.",
+        "confidence": 0.92
+      },
+      {
+        "id": "UK_ALEVEL_ECONOMICS",
+        "examples": [
+          "A Level Economics",
+          "A-level econ teacher",
+          "KS5 economics"
+        ],
+        "match": {
+          "type": "regex_any",
+          "patterns": [
+            "\\bA\\s*Level\\b.*\\bEconom",
+            "\\bKS5\\b.*\\bEconom",
+            "\\bA-?level\\b.*\\becon\\b"
+          ]
+        },
+        "normalized": {
+          "curriculum_system": "UK",
+          "stage": "A Level",
+          "subjects": [
+            "Economics"
+          ]
+        },
+        "tables_to_query": [
+          "learning_labs_UK_standards_with_KS2_KS3.csv"
+        ],
+        "filters": {
+          "A Level Subjects": [
+            "Economics"
+          ]
+        },
+        "recommended_labs": [
+          "Renewable Energy",
+          "Agriculture & Climate Change",
+          "Climate Justice & Equity",
+          "En-ROADS Climate Modeling"
+        ],
+        "routing_notes": "Frame as externalities, market failure, policy instruments, cost-benefit, distributional impacts.",
+        "confidence": 0.87
+      },
+      {
+        "id": "CAM_IGCSE_BIO",
+        "examples": [
+          "Cambridge IGCSE Biology",
+          "IGCSE Bio",
+          "IGCSE biology teacher"
+        ],
+        "match": {
+          "type": "regex_any",
+          "patterns": [
+            "\\b(Cambridge\\s*)?IGCSE\\b.*\\bBiolog",
+            "\\bIGCSE\\b.*\\bbio\\b"
+          ]
+        },
+        "normalized": {
+          "curriculum_system": "Cambridge",
+          "stage": "IGCSE",
+          "subjects": [
+            "Biology"
+          ]
+        },
+        "tables_to_query": [
+          "learning_labs_cambridge_standards.csv"
+        ],
+        "filters": {
+          "IGCSE/IGCSE (9-1)": [
+            "IGCSE Biology"
+          ]
+        },
+        "recommended_labs": [
+          "Invasive Species",
+          "Climate Change & Health",
+          "Agriculture & Climate Change",
+          "Wildfires"
+        ],
+        "routing_notes": "Use Cambridge command-term language: investigate, evaluate, explain; emphasize data handling and extended responses.",
+        "confidence": 0.9
+      },
+      {
+        "id": "CAM_GLOBAL_PERSPECTIVES",
+        "examples": [
+          "Cambridge Global Perspectives",
+          "Global Perspectives",
+          "IGCSE Global Perspectives"
+        ],
+        "match": {
+          "type": "regex_any",
+          "patterns": [
+            "\\bGlobal\\s*Perspectives\\b",
+            "\\bIGCSE\\b.*\\bGlobal\\s*Perspectives\\b"
+          ]
+        },
+        "normalized": {
+          "curriculum_system": "Cambridge",
+          "stage": "IGCSE",
+          "subjects": [
+            "Global Perspectives"
+          ]
+        },
+        "tables_to_query": [
+          "learning_labs_cambridge_standards.csv"
+        ],
+        "filters": {
+          "Cross-curricular / Global Perspectives": [
+            "research question",
+            "perspectives"
+          ]
+        },
+        "recommended_labs": [
+          "Climate Justice & Equity",
+          "Climate Migration",
+          "Civics & Climate Action",
+          "Renewable Energy"
+        ],
+        "routing_notes": "Route to Cross-curricular/GP hooks: research question, perspectives, source evaluation, presentation/action.",
+        "confidence": 0.88
+      },
+      {
+        "id": "AMBIG_AP",
+        "examples": [
+          "I teach AP",
+          "AP class",
+          "advanced placement"
+        ],
+        "match": {
+          "type": "regex_any",
+          "patterns": [
+            "\\bAP\\b(?!\\w)",
+            "\\badvanced\\s*placement\\b"
+          ]
+        },
+        "normalized": {
+          "curriculum_system": "US",
+          "stage": "AP",
+          "subjects": []
+        },
+        "tables_to_query": [
+          "learning_labs_US_standards_full_progression.csv"
+        ],
+        "filters": {},
+        "recommended_labs": [
+          "En-ROADS Climate Modeling",
+          "Renewable Energy",
+          "Climate Migration",
+          "Sea Level Rise"
+        ],
+        "routing_notes": "Ask a single follow-up: which AP course? If not possible, offer top labs with broad AP fit and let teacher choose.",
+        "confidence": 0.62
+      },
+      {
+        "id": "AMBIG_UK_SECONDARY",
+        "examples": [
+          "I teach secondary",
+          "I teach Year 9",
+          "KS3 teacher"
+        ],
+        "match": {
+          "type": "regex_any",
+          "patterns": [
+            "\\bKS3\\b",
+            "\\bYear\\s*9\\b",
+            "\\bsecondary\\b"
+          ]
+        },
+        "normalized": {
+          "curriculum_system": "UK",
+          "stage": "KS3",
+          "subjects": []
+        },
+        "tables_to_query": [
+          "learning_labs_UK_standards_with_KS2_KS3.csv"
+        ],
+        "filters": {},
+        "recommended_labs": [
+          "Floods & Droughts",
+          "Wildfires",
+          "Sea Level Rise",
+          "Climate Migration"
+        ],
+        "routing_notes": "If subject unspecified, prioritize Geography/Science-friendly labs and propose options; invite teacher to pick topic.",
+        "confidence": 0.7
+      }
+    ]
+  },
+  "agent1_routing_instructions": {
+    "step_by_step": [
+      "1. Match teacher input text against routing.patterns using regex_any matching",
+      "2. If confidence >= 0.75: proceed with matched curriculum_system and stage",
+      "3. If confidence < 0.75 OR no match: use fallback_script to ask one clarifying question",
+      "4. Load correct standards table from standards[curriculum_system]",
+      "5. Filter table rows by subject and grade/stage using pattern filters",
+      "6. Generate: connection_statement + specific_standard_codes + integration_suggestion + recommended_labs",
+      "7. Always end with one concrete next step the teacher can take"
+    ],
+    "never_do": [
+      "Never cite NGSS codes to a UK, IB, or Cambridge teacher",
+      "Never cite IB criteria numbers to a US public school teacher",
+      "Never assume NGSS adoption \u2014 check state_standards_note column before citing NGSS to any US teacher",
+      "Never cite specific GCSE spec content without first asking which exam board (AQA/OCR/Edexcel/WJEC)",
+      "Never apply the UK table to Scottish, Welsh, or Northern Irish schools",
+      "Never present standards alignment as exhaustive \u2014 always say 'here are the strongest connections'",
+      "Never cite AP Unit/Skill Hooks without noting that AP Course Descriptions update annually"
+    ],
+    "fallback_script": "I want to make sure I give you the most relevant standards connections. Could you tell me: (1) what curriculum system your school follows \u2014 for example US state standards, IB, UK National Curriculum, or Cambridge International? And (2) what subject and year or grade level you teach?",
+    "low_confidence_script": "I have a couple of possible matches for what you described \u2014 are you teaching [option A] or [option B]? That will help me pull exactly the right standards alignment for you.",
+    "state_adoption_fallback": "I want to flag that not all US states have adopted NGSS \u2014 could you confirm which state you teach in? That way I can make sure the standards codes I suggest are the ones your school actually uses."
+  },
+  "standards": {
+    "US": {
+      "description": "United States national subject-specific standards. Full K-12 progression including elementary (K-5), middle (6-8), high school (9-12), and AP courses.",
+      "critical_warning": "The US has NO single unified curriculum. Standards are subject-specific. NGSS = science only. CCSS = ELA and Math only. C3 = social studies only. Never use NGSS codes for a social studies, arts, or math teacher.",
+      "state_adoption_warning": "Texas uses TEKS (not NGSS). Virginia uses SOLs (not NGSS). Several other states have modified or rejected NGSS/CCSS. Always check the state_standards_note column and confirm teacher's state before citing specific codes.",
+      "ap_warning": "AP Course Descriptions are updated annually by College Board each fall. Always direct teacher to apcentral.collegeboard.org for the current CED.",
+      "columns": [
+        "Learning Lab",
+        "NGSS HS",
+        "NGSS MS/ES",
+        "CCSS ELA",
+        "Subject Fit",
+        "Curriculum Pitch",
+        "NCTM",
+        "CSTA",
+        "ISTE",
+        "US Grade Bands",
+        "CCSS ELA K-8",
+        "CCSS Math K-8",
+        "AP Course Fit",
+        "AP Unit/Skill Hooks",
+        "State Standards Note"
+      ],
+      "data": [
+        {
+          "Learning Lab": "Agriculture & Climate Change",
+          "NGSS HS": "HS-ESS3-4; HS-ESS3-5; HS-ETS1-3",
+          "NGSS MS/ES": "MS-ESS3-3; 3-ESS3-1",
+          "CCSS ELA": "RST.11-12.7; WHST.9-12.1",
+          "Subject Fit": "Environmental Science; Biology; Earth Science; Chemistry; Economics; Geography; Math; ELA",
+          "Curriculum Pitch": "Investigate how agricultural systems influence climate change and evaluate evidence-based mitigation or adaptation strategies.",
+          "NCTM": "Problem Solving; Representation; Data Analysis; Connections",
+          "CSTA": "Data & Analysis; Impacts of Computing",
+          "ISTE": "Knowledge Constructor; Global Collaborator",
+          "US Grade Bands": "3-5; 6-8; 9-10; 11-12",
+          "CCSS ELA K-8": "RI.4.7; W.5.1; SL.5.4",
+          "CCSS Math K-8": "Ratios & Proportional Relationships; Statistics & Probability",
+          "AP Course Fit": "AP Environmental Science; AP Biology; AP Human Geography; AP Statistics",
+          "AP Unit/Skill Hooks": "APES Unit 4 Earth Systems; Unit 6 Energy Resources; Skills: Data Analysis, Argumentation",
+          "State Standards Note": "Aligns well with state science standards derived from NGSS; supports ELA informational text and argument writing across K-12."
+        },
+        {
+          "Learning Lab": "Renewable Energy",
+          "NGSS HS": "HS-ESS3-2; HS-PS3-3; HS-ETS1-2",
+          "NGSS MS/ES": "MS-PS3-3; 4-PS3-4",
+          "CCSS ELA": "RST.9-10.7; WHST.9-12.7",
+          "Subject Fit": "Physics; Chemistry; Environmental Science; Engineering; Computer Science; Economics; Math",
+          "Curriculum Pitch": "Analyze renewable energy technologies and design feasible energy solutions considering cost, efficiency, and environmental impact.",
+          "NCTM": "Problem Solving; Mathematical Modeling; Representation",
+          "CSTA": "Computing Systems; Data & Analysis",
+          "ISTE": "Innovative Designer; Computational Thinker",
+          "US Grade Bands": "3-5; 6-8; 9-10; 11-12",
+          "CCSS ELA K-8": "RI.4.7; W.4.7; SL.5.4",
+          "CCSS Math K-8": "Expressions & Equations; Ratios & Proportional Relationships; Statistics & Probability",
+          "AP Course Fit": "AP Environmental Science; AP Physics 1; AP Physics C; AP Statistics",
+          "AP Unit/Skill Hooks": "APES Energy Resources; AP Physics Energy & Work; Skills: Modeling, Quantitative Analysis",
+          "State Standards Note": "Aligns with many state science standards emphasizing energy systems, engineering design, and data interpretation."
+        },
+        {
+          "Learning Lab": "Civics & Climate Action",
+          "NGSS HS": "HS-ESS3-2; HS-ESS3-4; HS-ETS1-1",
+          "NGSS MS/ES": "MS-ESS3-3; 5-ESS3-1",
+          "CCSS ELA": "SL.11-12.4; WHST.9-12.1",
+          "Subject Fit": "Civics; Government; Social Studies; Environmental Science; ELA; Statistics",
+          "Curriculum Pitch": "Research climate-related issues and communicate policy proposals using evidence and persuasive argument.",
+          "NCTM": "Communication; Data Analysis",
+          "CSTA": "Impacts of Computing; Data Literacy",
+          "ISTE": "Creative Communicator; Digital Citizen",
+          "US Grade Bands": "3-5; 6-8; 9-10; 11-12",
+          "CCSS ELA K-8": "RI.5.8; W.5.1; SL.5.4",
+          "CCSS Math K-8": "Statistics & Probability",
+          "AP Course Fit": "AP Environmental Science; AP Human Geography; AP US Government; AP Comparative Government",
+          "AP Unit/Skill Hooks": "AP Gov Policy Analysis; APES Environmental Policy; Skills: Argumentation, Evidence Evaluation",
+          "State Standards Note": "Supports civic literacy and science-based policy analysis aligned with state social studies frameworks."
+        },
+        {
+          "Learning Lab": "Climate Justice & Equity",
+          "NGSS HS": "HS-ESS3-1; HS-ESS3-4; HS-ETS1-1",
+          "NGSS MS/ES": "MS-ESS3-4; 5-ESS3-1",
+          "CCSS ELA": "RST.11-12.1; SL.11-12.4",
+          "Subject Fit": "Social Studies; Sociology; Geography; Environmental Science; ELA",
+          "Curriculum Pitch": "Examine unequal climate impacts and evaluate solutions through environmental, economic, and social lenses.",
+          "NCTM": "Reasoning; Data Interpretation",
+          "CSTA": "Data & Analysis; Impacts of Computing",
+          "ISTE": "Global Collaborator; Knowledge Constructor",
+          "US Grade Bands": "3-5; 6-8; 9-10; 11-12",
+          "CCSS ELA K-8": "RI.5.3; W.5.1; SL.6.1",
+          "CCSS Math K-8": "Statistics & Probability",
+          "AP Course Fit": "AP Environmental Science; AP Human Geography; AP World History; AP Comparative Government",
+          "AP Unit/Skill Hooks": "AP Human Geography Population & Development; Skills: Source Evaluation, Case Study Analysis",
+          "State Standards Note": "Aligns with state social studies standards emphasizing equity, geography, and human-environment interactions."
+        },
+        {
+          "Learning Lab": "Invasive Species",
+          "NGSS HS": "HS-LS2-2; HS-LS2-7; HS-ESS2-2",
+          "NGSS MS/ES": "MS-LS2-1; 3-LS4-3",
+          "CCSS ELA": "RST.9-10.8; WHST.9-12.7",
+          "Subject Fit": "Biology; Ecology; Environmental Science; Geography; Math",
+          "Curriculum Pitch": "Study ecological systems and investigate how invasive species alter biodiversity and ecosystem stability.",
+          "NCTM": "Representation; Data Analysis",
+          "CSTA": "Data & Analysis",
+          "ISTE": "Knowledge Constructor",
+          "US Grade Bands": "3-5; 6-8; 9-10; 11-12",
+          "CCSS ELA K-8": "RI.4.7; W.5.2; SL.5.4",
+          "CCSS Math K-8": "Statistics & Probability",
+          "AP Course Fit": "AP Biology; AP Environmental Science",
+          "AP Unit/Skill Hooks": "AP Bio Ecology Units; APES Biodiversity; Skills: Data Analysis, Scientific Investigation",
+          "State Standards Note": "Supports ecosystem and biodiversity learning goals common across state science standards."
+        },
+        {
+          "Learning Lab": "Wildfires",
+          "NGSS HS": "HS-ESS3-1; HS-ESS3-4; HS-ESS3-5",
+          "NGSS MS/ES": "MS-ESS3-2; 3-ESS3-1",
+          "CCSS ELA": "RST.11-12.7; SL.11-12.5",
+          "Subject Fit": "Earth Science; Environmental Science; Biology; Chemistry; Geography; Statistics",
+          "Curriculum Pitch": "Analyze wildfire causes, impacts, and mitigation strategies using scientific data and geographic evidence.",
+          "NCTM": "Data Analysis; Modeling",
+          "CSTA": "Data Visualization; Impacts of Computing",
+          "ISTE": "Creative Communicator",
+          "US Grade Bands": "3-5; 6-8; 9-10; 11-12",
+          "CCSS ELA K-8": "RI.4.9; W.5.7; SL.5.4",
+          "CCSS Math K-8": "Statistics & Probability; Ratios & Proportional Relationships",
+          "AP Course Fit": "AP Environmental Science; AP Geography; AP Statistics",
+          "AP Unit/Skill Hooks": "APES Land Use & Forestry; Skills: Data Interpretation, Risk Analysis",
+          "State Standards Note": "Reinforces hazard science and environmental systems concepts emphasized in many state standards."
+        },
+        {
+          "Learning Lab": "Floods & Droughts",
+          "NGSS HS": "HS-ESS2-4; HS-ESS3-1; HS-ESS3-4",
+          "NGSS MS/ES": "MS-ESS3-2; 3-ESS3-1",
+          "CCSS ELA": "RST.9-10.7; WHST.9-12.2",
+          "Subject Fit": "Earth Science; Geography; Environmental Science; Engineering; Math",
+          "Curriculum Pitch": "Use hydrology and climate data to explain extreme water events and design resilient infrastructure solutions.",
+          "NCTM": "Modeling; Representation",
+          "CSTA": "Data Analysis",
+          "ISTE": "Innovative Designer",
+          "US Grade Bands": "3-5; 6-8; 9-10; 11-12",
+          "CCSS ELA K-8": "RI.5.7; W.5.2; SL.5.4",
+          "CCSS Math K-8": "Ratios & Proportional Relationships; Statistics & Probability",
+          "AP Course Fit": "AP Environmental Science; AP Human Geography; AP Statistics",
+          "AP Unit/Skill Hooks": "APES Water Resources; Skills: Graph Interpretation, Modeling",
+          "State Standards Note": "Supports hydrology, natural hazards, and data literacy emphasized across NGSS-aligned state standards."
+        },
+        {
+          "Learning Lab": "Sea Level Rise",
+          "NGSS HS": "HS-ESS2-2; HS-ESS2-4; HS-ESS3-5",
+          "NGSS MS/ES": "MS-ESS2-6; 4-ESS2-2",
+          "CCSS ELA": "RST.11-12.7; WHST.9-12.1",
+          "Subject Fit": "Earth Science; Physics; Geography; Environmental Science; Economics; Math",
+          "Curriculum Pitch": "Investigate how thermal expansion and melting ice contribute to sea level rise and evaluate coastal adaptation strategies.",
+          "NCTM": "Representation; Data Interpretation",
+          "CSTA": "Data Visualization",
+          "ISTE": "Knowledge Constructor",
+          "US Grade Bands": "3-5; 6-8; 9-10; 11-12",
+          "CCSS ELA K-8": "RI.4.7; W.5.2; SL.5.4",
+          "CCSS Math K-8": "Statistics & Probability; Ratios & Proportional Relationships",
+          "AP Course Fit": "AP Environmental Science; AP Physics 1; AP Human Geography",
+          "AP Unit/Skill Hooks": "APES Climate Systems; Skills: Modeling, Data Analysis",
+          "State Standards Note": "Aligns with coastal processes and climate system standards present in many state science frameworks."
+        },
+        {
+          "Learning Lab": "Climate Change & Health",
+          "NGSS HS": "HS-ESS3-3; HS-LS2-7; HS-LS4-6",
+          "NGSS MS/ES": "MS-LS2-5; 5-ESS3-1",
+          "CCSS ELA": "RST.11-12.1; SL.11-12.4",
+          "Subject Fit": "Biology; Health Science; Environmental Science; Psychology; Statistics",
+          "Curriculum Pitch": "Trace pathways from climate drivers to human health outcomes and evaluate prevention strategies.",
+          "NCTM": "Data Analysis; Probability",
+          "CSTA": "Data Literacy",
+          "ISTE": "Global Collaborator",
+          "US Grade Bands": "3-5; 6-8; 9-10; 11-12",
+          "CCSS ELA K-8": "RI.5.3; W.5.2; SL.6.1",
+          "CCSS Math K-8": "Statistics & Probability",
+          "AP Course Fit": "AP Biology; AP Environmental Science; AP Psychology; AP Statistics",
+          "AP Unit/Skill Hooks": "AP Bio Ecology; APES Pollution & Human Health; Skills: Data Interpretation, Evaluation",
+          "State Standards Note": "Supports environmental health and human biology topics emphasized in state science curricula."
+        },
+        {
+          "Learning Lab": "Climate Migration",
+          "NGSS HS": "HS-ESS3-1; HS-ESS3-4; HS-ETS1-1",
+          "NGSS MS/ES": "MS-ESS3-4; 4-ESS3-2",
+          "CCSS ELA": "RST.11-12.2; WHST.9-12.1",
+          "Subject Fit": "Human Geography; History; Civics; Sociology; Economics; ELA",
+          "Curriculum Pitch": "Investigate how environmental change influences migration and evaluate policy and social responses.",
+          "NCTM": "Data Interpretation; Communication",
+          "CSTA": "Data Analysis",
+          "ISTE": "Global Collaborator",
+          "US Grade Bands": "6-8; 9-10; 11-12",
+          "CCSS ELA K-8": "RI.6.7; W.6.1; SL.6.4",
+          "CCSS Math K-8": "Statistics & Probability",
+          "AP Course Fit": "AP Human Geography; AP World History; AP Comparative Government",
+          "AP Unit/Skill Hooks": "AP Human Geography Population & Migration; Skills: Case Study Analysis, Argumentation",
+          "State Standards Note": "Aligns with geography and social studies standards focused on population movement and global systems."
+        },
+        {
+          "Learning Lab": "En-ROADS Climate Modeling",
+          "NGSS HS": "HS-ESS3-5; HS-ESS3-4; HS-ETS1-3",
+          "NGSS MS/ES": "MS-ESS3-3; 5-ESS3-1",
+          "CCSS ELA": "RST.11-12.7; SL.11-12.4",
+          "Subject Fit": "Environmental Science; Physics; Chemistry; Math; Economics; Computer Science",
+          "Curriculum Pitch": "Use system dynamics models to test climate solution scenarios and evaluate policy portfolios.",
+          "NCTM": "Mathematical Modeling; Data Analysis",
+          "CSTA": "Computational Modeling; Data Analysis",
+          "ISTE": "Computational Thinker",
+          "US Grade Bands": "6-8; 9-10; 11-12",
+          "CCSS ELA K-8": "RI.6.7; W.6.7; SL.6.4",
+          "CCSS Math K-8": "Expressions & Equations; Statistics & Probability",
+          "AP Course Fit": "AP Environmental Science; AP Statistics; AP Computer Science Principles; AP Economics",
+          "AP Unit/Skill Hooks": "APES Climate Models; AP Statistics Data Analysis; Skills: Systems Thinking, Modeling",
+          "State Standards Note": "Supports data-driven modeling and climate systems analysis aligned with NGSS-inspired state standards."
+        }
+      ]
+    },
+    "IB": {
+      "description": "International Baccalaureate: PYP (ages 3-12), MYP (11-16), DP (16-19). Approximately 5,600 schools in 160+ countries. English, French, and Spanish medium instruction.",
+      "critical_warning": "IB does NOT use numbered standard codes like NGSS. Alignment is to programme frameworks, global contexts, key concepts, and assessment criteria. Never invent IB standard code numbers.",
+      "update_note": "IB subject guides updated on rolling cycles. Direct teacher to ibo.org for their specific subject guide and current edition year.",
+      "columns": [
+        "Learning Lab",
+        "PYP Themes",
+        "MYP Global Context",
+        "MYP Subjects",
+        "DP Subjects",
+        "TOK/EE/CAS Ideas"
+      ],
+      "data": [
+        {
+          "Learning Lab": "Agriculture & Climate Change",
+          "PYP Themes": "Sharing the Planet; How the World Works; How We Organize Ourselves",
+          "MYP Global Context": "Globalization & Sustainability; Scientific & Technical Innovation",
+          "MYP Subjects": "Sciences; Individuals & Societies; Design; Mathematics; Language & Literature",
+          "DP Subjects": "Environmental Systems & Societies; Biology; Geography; Economics; Mathematics AI/AA",
+          "TOK/EE/CAS Ideas": "TOK: reliability of environmental models; EE: local food system sustainability study; CAS: school garden or food waste reduction project"
+        },
+        {
+          "Learning Lab": "Renewable Energy",
+          "PYP Themes": "How the World Works; Sharing the Planet",
+          "MYP Global Context": "Scientific & Technical Innovation; Globalization & Sustainability",
+          "MYP Subjects": "Sciences; Design; Mathematics; Individuals & Societies",
+          "DP Subjects": "Physics; Chemistry; Environmental Systems & Societies; Economics; Mathematics",
+          "TOK/EE/CAS Ideas": "TOK: technology vs ethics in energy decisions; EE: renewable energy feasibility study; CAS: school energy audit"
+        },
+        {
+          "Learning Lab": "Civics & Climate Action",
+          "PYP Themes": "How We Organize Ourselves; Sharing the Planet; Who We Are",
+          "MYP Global Context": "Fairness & Development; Globalization & Sustainability",
+          "MYP Subjects": "Individuals & Societies; Language & Literature; Design; Arts",
+          "DP Subjects": "Global Politics; Geography; Economics; Language A",
+          "TOK/EE/CAS Ideas": "TOK: knowledge and political decision-making; EE: climate policy analysis; CAS: civic engagement campaign"
+        },
+        {
+          "Learning Lab": "Climate Justice & Equity",
+          "PYP Themes": "Who We Are; Sharing the Planet",
+          "MYP Global Context": "Fairness & Development; Identities & Relationships",
+          "MYP Subjects": "Individuals & Societies; Language & Literature; Sciences",
+          "DP Subjects": "Global Politics; Geography; Economics; Environmental Systems & Societies",
+          "TOK/EE/CAS Ideas": "TOK: perspectives and bias in global issues; EE: climate justice case study; CAS: equity-focused climate outreach"
+        },
+        {
+          "Learning Lab": "Invasive Species",
+          "PYP Themes": "Sharing the Planet; How the World Works",
+          "MYP Global Context": "Globalization & Sustainability",
+          "MYP Subjects": "Sciences; Design; Mathematics",
+          "DP Subjects": "Biology; Environmental Systems & Societies; Geography",
+          "TOK/EE/CAS Ideas": "TOK: classification and evidence; EE: field ecology investigation; CAS: habitat restoration project"
+        },
+        {
+          "Learning Lab": "Wildfires",
+          "PYP Themes": "How the World Works; Sharing the Planet",
+          "MYP Global Context": "Globalization & Sustainability; Orientation in Time and Space",
+          "MYP Subjects": "Sciences; Individuals & Societies; Design",
+          "DP Subjects": "Geography; Biology; Environmental Systems & Societies; Chemistry",
+          "TOK/EE/CAS Ideas": "TOK: uncertainty in risk prediction; EE: wildfire risk mapping; CAS: community wildfire awareness campaign"
+        },
+        {
+          "Learning Lab": "Floods & Droughts",
+          "PYP Themes": "How the World Works; Sharing the Planet",
+          "MYP Global Context": "Globalization & Sustainability; Scientific & Technical Innovation",
+          "MYP Subjects": "Sciences; Design; Mathematics; Individuals & Societies",
+          "DP Subjects": "Geography; Environmental Systems & Societies; Mathematics",
+          "TOK/EE/CAS Ideas": "TOK: evidence in complex systems; EE: hydrology study; CAS: water conservation initiative"
+        },
+        {
+          "Learning Lab": "Sea Level Rise",
+          "PYP Themes": "Where We Are in Place and Time; Sharing the Planet",
+          "MYP Global Context": "Orientation in Time and Space; Globalization & Sustainability",
+          "MYP Subjects": "Sciences; Individuals & Societies; Mathematics; Design",
+          "DP Subjects": "Environmental Systems & Societies; Geography; Physics; Mathematics",
+          "TOK/EE/CAS Ideas": "TOK: predictive models and certainty; EE: coastal vulnerability analysis; CAS: coastal adaptation awareness"
+        },
+        {
+          "Learning Lab": "Climate Change & Health",
+          "PYP Themes": "Who We Are; Sharing the Planet",
+          "MYP Global Context": "Identities & Relationships; Globalization & Sustainability",
+          "MYP Subjects": "Sciences; Physical & Health Education; Individuals & Societies",
+          "DP Subjects": "Biology; Environmental Systems & Societies; Psychology; Geography",
+          "TOK/EE/CAS Ideas": "TOK: knowledge claims in public health; EE: climate-health relationship study; CAS: health awareness campaign"
+        },
+        {
+          "Learning Lab": "Climate Migration",
+          "PYP Themes": "Where We Are in Place and Time; Who We Are",
+          "MYP Global Context": "Orientation in Time and Space; Fairness & Development",
+          "MYP Subjects": "Individuals & Societies; Language & Literature; Language Acquisition",
+          "DP Subjects": "Geography; Global Politics; History; Economics",
+          "TOK/EE/CAS Ideas": "TOK: perspectives and narratives in migration; EE: migration case study; CAS: community partnership with migrant support organizations"
+        },
+        {
+          "Learning Lab": "En-ROADS Climate Modeling",
+          "PYP Themes": "How the World Works; Sharing the Planet",
+          "MYP Global Context": "Scientific & Technical Innovation; Globalization & Sustainability",
+          "MYP Subjects": "Sciences; Mathematics; Design; Individuals & Societies",
+          "DP Subjects": "Environmental Systems & Societies; Physics; Economics; Mathematics",
+          "TOK/EE/CAS Ideas": "TOK: models and decision-making; EE: climate scenario modeling; CAS: climate solutions advocacy"
+        }
+      ]
+    },
+    "UK": {
+      "description": "England National Curriculum: KS2 (ages 7-11), KS3 (11-14), GCSE/KS4 (14-16), A Level/KS5 (16-18). Main exam boards: AQA, OCR, Edexcel, WJEC.",
+      "critical_warning": "ENGLAND ONLY. Scotland (Curriculum for Excellence), Wales (Curriculum for Wales), and Northern Ireland all have separate and distinct curricula. Do not apply this table to non-English schools.",
+      "exam_board_warning": "GCSE and A Level content varies meaningfully between AQA, OCR, Edexcel, and WJEC. Always ask which exam board before citing specification-level content.",
+      "columns": [
+        "Learning Lab",
+        "KS2 Standards",
+        "KS3 Standards",
+        "GCSE Subjects",
+        "A Level Subjects",
+        "Cross Curricular"
+      ],
+      "data": [
+        {
+          "Learning Lab": "Agriculture & Climate Change",
+          "KS2 Standards": "Science (Living things and their habitats; Plants); Geography (Human and physical geography)",
+          "KS3 Standards": "Science (Ecosystems; Earth and atmosphere); Geography (Human impacts on environments)",
+          "GCSE Subjects": "Biology; Geography; Combined Science; Environmental Science; Food Preparation & Nutrition",
+          "A Level Subjects": "Biology; Geography; Environmental Science; Economics",
+          "Cross Curricular": "Fieldwork data analysis; sustainability case studies; food systems and climate debates"
+        },
+        {
+          "Learning Lab": "Renewable Energy",
+          "KS2 Standards": "Science (Energy and electricity); Design & Technology",
+          "KS3 Standards": "Physics (Energy changes and transfers); Design & Technology (Engineering design)",
+          "GCSE Subjects": "Physics; Combined Science; Geography; Design & Technology; Mathematics",
+          "A Level Subjects": "Physics; Environmental Science; Geography; Engineering; Economics",
+          "Cross Curricular": "Energy efficiency calculations; engineering design challenges; energy policy analysis"
+        },
+        {
+          "Learning Lab": "Civics & Climate Action",
+          "KS2 Standards": "Geography (Human geography); English (Speaking and listening for discussion)",
+          "KS3 Standards": "Citizenship (Rights and responsibilities); Geography (Environmental interactions)",
+          "GCSE Subjects": "Citizenship Studies; Geography; English Language; Religious Studies",
+          "A Level Subjects": "Politics; Geography; Sociology; Economics",
+          "Cross Curricular": "Persuasive writing; policy debate; community action projects"
+        },
+        {
+          "Learning Lab": "Climate Justice & Equity",
+          "KS2 Standards": "Geography (Human geography and global issues); PSHE discussions",
+          "KS3 Standards": "Citizenship (Social justice); Geography (Global development issues)",
+          "GCSE Subjects": "Geography; Citizenship Studies; Religious Studies; English",
+          "A Level Subjects": "Geography; Sociology; Politics; Philosophy",
+          "Cross Curricular": "Ethics debates; case study analysis of global inequality; human rights discussions"
+        },
+        {
+          "Learning Lab": "Invasive Species",
+          "KS2 Standards": "Science (Living things and habitats); Geography (Ecosystems)",
+          "KS3 Standards": "Biology (Interdependence and ecosystems)",
+          "GCSE Subjects": "Biology; Combined Science; Geography",
+          "A Level Subjects": "Biology; Environmental Science; Geography",
+          "Cross Curricular": "Field sampling; biodiversity surveys; ecosystem data interpretation"
+        },
+        {
+          "Learning Lab": "Wildfires",
+          "KS2 Standards": "Geography (Natural disasters and environmental change)",
+          "KS3 Standards": "Geography (Physical processes and hazards); Science (Atmospheric processes)",
+          "GCSE Subjects": "Geography; Combined Science; Biology; Chemistry",
+          "A Level Subjects": "Geography; Environmental Science; Chemistry",
+          "Cross Curricular": "Hazard mapping; climate data interpretation; disaster risk management"
+        },
+        {
+          "Learning Lab": "Floods & Droughts",
+          "KS2 Standards": "Geography (Water cycle; rivers and flooding)",
+          "KS3 Standards": "Geography (Hydrological processes); Science (Earth systems)",
+          "GCSE Subjects": "Geography; Combined Science; Physics",
+          "A Level Subjects": "Geography; Environmental Science; Physics",
+          "Cross Curricular": "Hydrology modeling; statistical rainfall analysis; infrastructure design"
+        },
+        {
+          "Learning Lab": "Sea Level Rise",
+          "KS2 Standards": "Geography (Coasts and climate change)",
+          "KS3 Standards": "Geography (Coastal processes; climate change)",
+          "GCSE Subjects": "Geography; Combined Science; Physics; Mathematics",
+          "A Level Subjects": "Geography; Environmental Science; Physics; Mathematics",
+          "Cross Curricular": "Graph interpretation; coastal management case studies; climate modeling"
+        },
+        {
+          "Learning Lab": "Climate Change & Health",
+          "KS2 Standards": "Science (Animals including humans; environmental impacts)",
+          "KS3 Standards": "Biology (Health and disease); Geography (Human environment)",
+          "GCSE Subjects": "Biology; Combined Science; Geography; Physical Education",
+          "A Level Subjects": "Biology; Environmental Science; Geography; Psychology",
+          "Cross Curricular": "Public health analysis; epidemiology discussions; environmental health research"
+        },
+        {
+          "Learning Lab": "Climate Migration",
+          "KS2 Standards": "Geography (Human geography; population and settlements)",
+          "KS3 Standards": "Geography (Population and development); Citizenship",
+          "GCSE Subjects": "Geography; Citizenship Studies; History; English",
+          "A Level Subjects": "Geography; Politics; Sociology; Economics",
+          "Cross Curricular": "Migration case studies; data analysis of population trends; policy debate"
+        },
+        {
+          "Learning Lab": "En-ROADS Climate Modeling",
+          "KS2 Standards": "Mathematics (Data handling and graphs); Science (Earth and space)",
+          "KS3 Standards": "Mathematics (Statistics and modeling); Science (Climate systems)",
+          "GCSE Subjects": "Mathematics; Physics; Geography; Computer Science",
+          "A Level Subjects": "Mathematics; Physics; Economics; Geography; Computer Science",
+          "Cross Curricular": "Systems modeling; spreadsheet simulations; climate scenario evaluation"
+        }
+      ]
+    },
+    "Cambridge": {
+      "description": "Cambridge Assessment International Education (CAIE). Used at international schools in 160+ countries. Distinct from UK National Curriculum \u2014 do not conflate the two.",
+      "critical_warning": "A school may offer Cambridge AND IB programmes simultaneously. Ask which programmes they offer before assuming one system.",
+      "update_note": "Syllabuses updated on rolling 5-year cycle. Always verify current syllabus year at cambridgeinternational.org before citing content-specific alignment.",
+      "columns": [
+        "Learning Lab",
+        "Cambridge Stage",
+        "Primary",
+        "Lower Secondary",
+        "IGCSE/IGCSE (9\u20131)",
+        "AS/A Level",
+        "Cross-curricular / Global Perspectives"
+      ],
+      "data": [
+        {
+          "Learning Lab": "Agriculture & Climate Change",
+          "Cambridge Stage": "Primary; Lower Secondary; IGCSE; AS/A",
+          "Primary": "Science (Plants; Ecology; Earth & Environment); Geography (Human & Physical); Computing (Data)",
+          "Lower Secondary": "Science (Ecosystems; Earth systems); Geography (Human-environment interactions); Computing (Data handling)",
+          "IGCSE/IGCSE (9\u20131)": "IGCSE Biology; IGCSE Geography; IGCSE Environmental Management; Global Perspectives",
+          "AS/A Level": "A Level Geography; A Level Biology; A Level Economics; A Level Environmental Management",
+          "Cross-curricular / Global Perspectives": "data handling; sustainability case studies; investigation; evaluation; research question; perspectives analysis"
+        },
+        {
+          "Learning Lab": "Renewable Energy",
+          "Cambridge Stage": "Primary; Lower Secondary; IGCSE; AS/A",
+          "Primary": "Science (Energy; Earth & Environment); Geography (Resources); Computing (Data)",
+          "Lower Secondary": "Physics (Energy transfers); Geography (Resources & sustainability); Design/Computing (modeling)",
+          "IGCSE/IGCSE (9\u20131)": "IGCSE Physics; IGCSE Chemistry; IGCSE Geography; Environmental Management",
+          "AS/A Level": "A Level Physics; A Level Geography; A Level Economics; A Level Environmental Management",
+          "Cross-curricular / Global Perspectives": "model interpretation; quantitative reasoning; evaluation of solutions; engineering design; data analysis"
+        },
+        {
+          "Learning Lab": "Civics & Climate Action",
+          "Cambridge Stage": "Primary; Lower Secondary; IGCSE; AS/A",
+          "Primary": "Geography (Human systems); English (discussion & argument); Computing (information evaluation)",
+          "Lower Secondary": "Geography (environmental governance); Global Perspectives (issues & debates)",
+          "IGCSE/IGCSE (9\u20131)": "IGCSE Geography; Global Perspectives; IGCSE English",
+          "AS/A Level": "A Level Geography; A Level Economics; A Level Sociology; A Level Politics (where offered)",
+          "Cross-curricular / Global Perspectives": "extended response; policy debate; evaluation of sources; research and presentation"
+        },
+        {
+          "Learning Lab": "Climate Justice & Equity",
+          "Cambridge Stage": "Lower Secondary; IGCSE; AS/A",
+          "Primary": "Geography (Human geography); English (discussion and empathy)",
+          "Lower Secondary": "Geography (development & inequality); Global Perspectives (perspectives analysis)",
+          "IGCSE/IGCSE (9\u20131)": "IGCSE Geography; Global Perspectives; Environmental Management",
+          "AS/A Level": "A Level Geography; A Level Sociology; A Level Economics",
+          "Cross-curricular / Global Perspectives": "perspectives analysis; ethical evaluation; case study comparison; argument construction"
+        },
+        {
+          "Learning Lab": "Invasive Species",
+          "Cambridge Stage": "Primary; Lower Secondary; IGCSE; AS/A",
+          "Primary": "Science (Living things & habitats; Ecology); Geography (Ecosystems)",
+          "Lower Secondary": "Biology (interdependence; ecosystems)",
+          "IGCSE/IGCSE (9\u20131)": "IGCSE Biology; IGCSE Geography; Environmental Management",
+          "AS/A Level": "A Level Biology; A Level Environmental Management; A Level Geography",
+          "Cross-curricular / Global Perspectives": "field investigation; data collection; biodiversity analysis; scientific evaluation"
+        },
+        {
+          "Learning Lab": "Wildfires",
+          "Cambridge Stage": "Primary; Lower Secondary; IGCSE; AS/A",
+          "Primary": "Geography (Natural hazards); Science (Earth & atmosphere)",
+          "Lower Secondary": "Geography (hazards); Science (atmospheric processes)",
+          "IGCSE/IGCSE (9\u20131)": "IGCSE Geography; IGCSE Biology; Environmental Management",
+          "AS/A Level": "A Level Geography; A Level Environmental Management; A Level Chemistry",
+          "Cross-curricular / Global Perspectives": "hazard mapping; case study analysis; evaluation; model interpretation"
+        },
+        {
+          "Learning Lab": "Floods & Droughts",
+          "Cambridge Stage": "Primary; Lower Secondary; IGCSE; AS/A",
+          "Primary": "Geography (Water systems); Science (Earth & environment)",
+          "Lower Secondary": "Geography (hydrology; hazards); Science (climate systems)",
+          "IGCSE/IGCSE (9\u20131)": "IGCSE Geography; Environmental Management; IGCSE Physics",
+          "AS/A Level": "A Level Geography; A Level Environmental Management; A Level Physics",
+          "Cross-curricular / Global Perspectives": "data handling; hydrology investigation; case study comparison; evaluation"
+        },
+        {
+          "Learning Lab": "Sea Level Rise",
+          "Cambridge Stage": "Primary; Lower Secondary; IGCSE; AS/A",
+          "Primary": "Geography (Coasts; climate); Science (Earth processes)",
+          "Lower Secondary": "Geography (coastal processes; climate change); Science (Earth systems)",
+          "IGCSE/IGCSE (9\u20131)": "IGCSE Geography; Environmental Management; IGCSE Physics",
+          "AS/A Level": "A Level Geography; A Level Environmental Management; A Level Physics",
+          "Cross-curricular / Global Perspectives": "graph interpretation; climate modeling; evaluation of adaptation strategies"
+        },
+        {
+          "Learning Lab": "Climate Change & Health",
+          "Cambridge Stage": "Primary; Lower Secondary; IGCSE; AS/A",
+          "Primary": "Science (Human health; environment); Geography (Human environment)",
+          "Lower Secondary": "Biology (health & disease); Geography (human impacts)",
+          "IGCSE/IGCSE (9\u20131)": "IGCSE Biology; Environmental Management; IGCSE Geography",
+          "AS/A Level": "A Level Biology; A Level Geography; A Level Environmental Management; A Level Psychology",
+          "Cross-curricular / Global Perspectives": "epidemiology case studies; data interpretation; evaluation of evidence"
+        },
+        {
+          "Learning Lab": "Climate Migration",
+          "Cambridge Stage": "Lower Secondary; IGCSE; AS/A",
+          "Primary": "Geography (population & settlements)",
+          "Lower Secondary": "Geography (population & development); Global Perspectives",
+          "IGCSE/IGCSE (9\u20131)": "IGCSE Geography; Global Perspectives",
+          "AS/A Level": "A Level Geography; A Level Sociology; A Level Economics",
+          "Cross-curricular / Global Perspectives": "case study analysis; perspectives evaluation; extended response"
+        },
+        {
+          "Learning Lab": "En-ROADS Climate Modeling",
+          "Cambridge Stage": "Lower Secondary; IGCSE; AS/A",
+          "Primary": "Science (Earth systems); Computing (Data representation)",
+          "Lower Secondary": "Science (climate systems); Computing (modeling; simulation)",
+          "IGCSE/IGCSE (9\u20131)": "IGCSE Physics; IGCSE Geography; Global Perspectives; Computer Science",
+          "AS/A Level": "A Level Geography; A Level Economics; A Level Mathematics; A Level Physics",
+          "Cross-curricular / Global Perspectives": "systems modeling; scenario analysis; data interpretation; evaluation"
+        }
+      ]
+    }
+  }
+}
