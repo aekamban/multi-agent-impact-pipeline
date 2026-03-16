@@ -19,6 +19,8 @@ Design rules:
     - normalize_student_count() and assign_track() are pure Python, no DB, always fast
     - extract_partners() uses LLM when LIVE_LLM=1; falls back to regex heuristic otherwise
     - parse_grade_reference() is pure Python; returns normalized grade band from any curriculum system
+    - infer_project_type(), infer_sustained_action(), infer_equity_flag() are pure Python,
+      deterministic, offline-safe — no LLM required
     - Never writes to project_state.impact_metrics or project_state.reporting
     - Never rewrites project_state.py or project_state_adapter.py
 """
@@ -39,6 +41,7 @@ from project_state import (
     Phase,
     ProjectState,
     RawInput,
+    SchoolType,
     StructuredIntake,
     TeacherContext,
     Track,
@@ -425,17 +428,28 @@ def parse_grade_reference(raw: str) -> "GradeReference":
     """
     Detect school system and normalize a grade reference.
 
-    Handles US, UK, and IB grade expressions:
-        "Year 6"    → normalized="6",    band="elementary"
-        "Year 7"    → normalized="7",    band="middle"
-        "MYP 3"     → normalized="MYP3", band="middle"
-        "DP 1"      → normalized="11",   band="high"
-        "Grade 7"   → normalized="7",    band="middle"
-        "9th grade" → normalized="9",    band="high"
-        "K"         → normalized="K",    band="elementary"
-        "6-8"       → normalized="6-8",  band="middle"
-        "9-12"      → normalized="9-12", band="high"
-        ""          → normalized="",     band="unknown"
+    normalized_grade field semantics:
+      - US grades:   bare number string, e.g. "9", or range "6-8"
+      - Kindergarten: "K"
+      - K-ranges:    "K-12", "K-8", "K-5"  (span from Kindergarten to grade N)
+      - IB MYP:      "MYP3" (not converted to US equivalent — retains original system label)
+      - IB DP:       "11" or "12" (DP1/DP2 mapped to US high-school equivalent)
+      - UK Year:     "Year6", "Year7" etc. (prefixed to avoid confusion with US grade numbers)
+
+    Examples:
+        "Year 6"    → normalized="Year6",  band="elementary"
+        "Year 7"    → normalized="Year7",  band="middle"
+        "MYP 3"     → normalized="MYP3",   band="middle"
+        "DP 1"      → normalized="11",     band="high"
+        "Grade 7"   → normalized="7",      band="middle"
+        "9th grade" → normalized="9",      band="high"
+        "K"         → normalized="K",      band="elementary"
+        "K-12"      → normalized="K-12",   band="mixed"
+        "K-8"       → normalized="K-8",    band="mixed"
+        "K-5"       → normalized="K-5",    band="elementary"
+        "6-8"       → normalized="6-8",    band="middle"
+        "9-12"      → normalized="9-12",   band="high"
+        ""          → normalized="",       band="unknown"
 
     Returns GradeReference with .raw, .normalized_grade, .grade_band.
     """
@@ -444,17 +458,31 @@ def parse_grade_reference(raw: str) -> "GradeReference":
 
     text = raw.strip()
 
-    # Kindergarten
+    # ── K-N ranges BEFORE single-K check to avoid misclassifying "K-12" as elementary ──
+    # Matches: K-12, K-8, K-5, Kindergarten-12, etc.
+    k_range_match = re.search(
+        r"\b(K|Kindergarten)\s*[-\u2013]\s*(\d{1,2})(?:st|nd|rd|th)?\b",
+        text, re.IGNORECASE
+    )
+    if k_range_match:
+        hi = int(k_range_match.group(2))
+        hi_band = _grade_number_to_band(hi)
+        # K=elementary; if hi is also elementary the whole range is elementary,
+        # otherwise it spans bands → mixed.
+        band = "elementary" if hi_band == "elementary" else "mixed"
+        return GradeReference(raw=raw, normalized_grade=f"K-{hi}", grade_band=band)
+
+    # ── Single Kindergarten ──────────────────────────────────────────────────
     if re.search(r"\b(K|Kindergarten)\b", text, re.IGNORECASE):
         return GradeReference(raw=raw, normalized_grade="K", grade_band="elementary")
 
-    # IB DP: DP1=grade 11, DP2=grade 12
+    # ── IB DP: DP1=grade 11, DP2=grade 12 ───────────────────────────────────
     dp_match = re.search(r"\bDP\s*([12])\b", text, re.IGNORECASE)
     if dp_match:
         grade = 10 + int(dp_match.group(1))
         return GradeReference(raw=raw, normalized_grade=str(grade), grade_band="high")
 
-    # IB MYP: MYP1=grade 6, MYP2=7, MYP3=8, MYP4=9, MYP5=10
+    # ── IB MYP: MYP1=grade 6, MYP2=7, MYP3=8, MYP4=9, MYP5=10 ─────────────
     myp_match = re.search(r"\bMYP\s*([1-5])\b", text, re.IGNORECASE)
     if myp_match:
         myp_num = int(myp_match.group(1))
@@ -462,7 +490,9 @@ def parse_grade_reference(raw: str) -> "GradeReference":
         band = _grade_number_to_band(us_equiv)
         return GradeReference(raw=raw, normalized_grade=f"MYP{myp_num}", grade_band=band)
 
-    # UK Year groups
+    # ── UK Year groups ───────────────────────────────────────────────────────
+    # normalized_grade is prefixed "Year N" (not bare number) to avoid
+    # false interpretation as a US grade by downstream consumers.
     year_match = re.search(r"\bYear\s*(\d{1,2})\b", text, re.IGNORECASE)
     if year_match:
         year_num = int(year_match.group(1))
@@ -472,10 +502,13 @@ def parse_grade_reference(raw: str) -> "GradeReference":
             band = "middle"
         else:
             band = "high"
-        return GradeReference(raw=raw, normalized_grade=str(year_num), grade_band=band)
+        return GradeReference(raw=raw, normalized_grade=f"Year{year_num}", grade_band=band)
 
-    # Grade range: "6-8", "9-12", "6th-8th"
-    range_match = re.search(r"\b(\d{1,2})(?:st|nd|rd|th)?\s*[-\u2013]\s*(\d{1,2})(?:st|nd|rd|th)?\b", text)
+    # ── Numeric grade range: "6-8", "9-12", "6th-8th" ───────────────────────
+    range_match = re.search(
+        r"\b(\d{1,2})(?:st|nd|rd|th)?\s*[-\u2013]\s*(\d{1,2})(?:st|nd|rd|th)?\b",
+        text
+    )
     if range_match:
         lo, hi = int(range_match.group(1)), int(range_match.group(2))
         lo_band = _grade_number_to_band(lo)
@@ -483,7 +516,7 @@ def parse_grade_reference(raw: str) -> "GradeReference":
         band = lo_band if lo_band == hi_band else "mixed"
         return GradeReference(raw=raw, normalized_grade=f"{lo}-{hi}", grade_band=band)
 
-    # Single US grade: "Grade 7", "9th", "7th grade"
+    # ── Single US grade: "Grade 7", "9th", "7th grade" ──────────────────────
     single_match = re.search(r"\b(?:grade\s*)?(\d{1,2})(?:st|nd|rd|th)?\b", text, re.IGNORECASE)
     if single_match:
         grade_num = int(single_match.group(1))
@@ -671,6 +704,211 @@ def extract_partners(narrative: str) -> list[CommunityPartner]:
 
 
 # ─────────────────────────────────────────
+# 5. INFERENCE HELPERS — deterministic, offline-safe
+# ─────────────────────────────────────────
+
+def _is_title1(teacher_context: TeacherContext) -> bool:
+    """
+    Normalize title1_status to a boolean.
+    Handles: "yes", "Yes", "YES", True, 1, and any other truthy string variant.
+    Returns False for any value that does not clearly mean yes.
+    """
+    raw = teacher_context.title1_status
+    if isinstance(raw, bool):
+        return raw
+    if isinstance(raw, int):
+        return raw == 1
+    if isinstance(raw, str):
+        return raw.strip().lower() == "yes"
+    return False
+
+
+def _safe_lower(*parts: Optional[str]) -> str:
+    """
+    Safely join and lowercase an arbitrary number of string parts.
+    None values and empty strings are silently skipped.
+    Returns a single lowercased string safe for keyword matching.
+    """
+    return " ".join(p for p in parts if p and p.strip()).lower()
+
+
+def infer_project_type(project_description: Optional[str], lab_name: Optional[str]) -> str:
+    """
+    Map free-text project description to one of 16 canonical project_type strings.
+    Uses keyword matching on combined description + lab_name text.
+    Returns "Other" if no match found.
+    Ordered from most-specific to least-specific (first match wins).
+    Safe against None or empty inputs.
+
+    Trigger design notes:
+      - "presentation" and "display" alone are NOT sufficient triggers for
+        "Awareness / communications campaign" because they appear in many
+        unrelated contexts (science fair, class presentation, etc.).
+        They require co-occurrence with "awareness" or "campaign".
+      - "curriculum" alone is NOT sufficient for "Curriculum integration /
+        life cycle analysis"; it must co-occur with "life cycle" or "lifecycle"
+        because almost every submission involves curriculum in some sense.
+      - "poster" is kept as a standalone trigger: in TCI submissions a poster
+        is almost always a public-facing awareness artifact.
+    """
+    text = _safe_lower(project_description, lab_name)
+
+    if any(k in text for k in ["compost", "composting"]):
+        return "Composting program"
+    if any(k in text for k in ["solar", "panels", "renewable energy", "wind turbine"]):
+        return "Renewable energy installation"
+    if any(k in text for k in ["tree planting", "reforestation", "replant"]) or (
+        "tree" in text and ("plant" in text or "trees" in text)
+    ):
+        return "Tree planting / reforestation"
+    if any(k in text for k in ["food waste", "waste reduction"]):
+        return "Food waste reduction"
+    if "recycl" in text:
+        return "Recycling program"
+    if (
+        any(k in text for k in ["school garden", "community garden",
+                                 "planting vegetable", "growing vegetable",
+                                 "grew vegetable"])
+        or ("garden" in text and "grow" in text)
+        or ("garden" in text and "plant" in text)
+    ):
+        return "School/community garden"
+    if any(k in text for k in ["letter to", "city council", "policy advocacy",
+                                "advocacy", "advocate", "petition", "legislation",
+                                "letter writing"]):
+        return "Policy advocacy / letter writing"
+    # "presentation" and "display" require co-occurrence with awareness/campaign
+    # to avoid false positives on generic class presentations.
+    if any(k in text for k in ["awareness campaign", "social media campaign", "awareness"]):
+        return "Awareness / communications campaign"
+    if "poster" in text:
+        return "Awareness / communications campaign"
+    if ("presentation" in text or "display" in text) and (
+        "campaign" in text or "public" in text or "community" in text
+    ):
+        return "Awareness / communications campaign"
+    if any(k in text for k in ["habitat", "invasive", "restoration",
+                                "native plant", "invasive species"]):
+        return "Habitat restoration / invasive species removal"
+    if any(k in text for k in ["trail", "outdoor classroom"]):
+        return "Environmental trail / outdoor classroom"
+    if any(k in text for k in ["citizen science", "nature journaling",
+                                "nature journal", "journaling"]):
+        return "Nature journaling / citizen science"
+    if any(k in text for k in ["youth club", "student club", "youth group",
+                                "student group", "youth engagement",
+                                "environmental club"]):
+        return "Youth engagement / club"
+    # "curriculum" alone is too broad — require life-cycle co-occurrence.
+    if any(k in text for k in ["life cycle", "lifecycle", "life-cycle analysis"]):
+        return "Curriculum integration / life cycle analysis"
+    if "curriculum" in text and "life cycle" not in text and "lifecycle" not in text:
+        pass  # fall through to "Other" rather than over-classifying
+    if any(k in text for k in ["carpool", "carpooling", "bike to school",
+                                "walk to school", "transit",
+                                "transportation behavior"]):
+        return "Transportation behavior change"
+    if any(k in text for k in ["energy audit", "energy efficiency", "led lights",
+                                "electricity reduction", "energy reduction"]):
+        return "Energy reduction/efficiency"
+    return "Other"
+
+
+def infer_sustained_action(
+    project_description: Optional[str],
+    additional_notes: Optional[str],
+) -> Optional[bool]:
+    """
+    Return True if the project continues beyond the class period.
+    Return False if it was clearly a one-off event.
+    Return None if there is insufficient signal.
+    Safe against None or empty inputs.
+
+    Signal design notes:
+      - "as a result" was intentionally excluded as a standalone trigger: it is
+        too common in general causal language ("as a result of our research, we
+        learned...") and fires false positives without additional context.
+        The compound phrase "now has ... as a result" is strong; "now has" alone
+        already fires True, which covers that case.
+      - "installed" is kept because physical infrastructure implies permanence.
+      - "annual" / "every year" signal institutionalisation beyond a single class period.
+    """
+    text = _safe_lower(project_description, additional_notes)
+
+    sustained_signals = [
+        "ongoing", "continues", "will continue", "permanent", "installed",
+        "now has", "adopted", "still running",
+        "every year", "annual", "long-term", "maintained",
+    ]
+    one_off_signals = [
+        "one-time", "one day", "single event", "presentation only",
+        "just presented", "completed",
+    ]
+
+    if any(s in text for s in sustained_signals):
+        return True
+    if any(s in text for s in one_off_signals):
+        return False
+    return None
+
+
+def infer_equity_flag(
+    teacher_context: TeacherContext,
+    project_description: Optional[str],
+    additional_notes: Optional[str] = None,
+) -> Optional[bool]:
+    """
+    Return True if there is clear evidence of serving an underserved community.
+    Return False if evidence clearly suggests otherwise.
+    Return None if there is insufficient signal to decide.
+
+    Signal sources (in priority order):
+      1. teacher_context.title1_status — normalised via _is_title1(); "yes"/"YES"/True/1
+         all count. Title I always returns True, overriding school type.
+      2. Equity keywords in project_description or additional_notes.
+      3. School type heuristic (POC only):
+           PRIVATE or MONTESSORI + no Title I + no equity keywords → False.
+           This is a lightweight POC heuristic, not a definitive determination.
+           Private/Montessori schools CAN serve underserved communities, but
+           without a positive signal we conservatively assume they do not.
+           A Title I flag or explicit keyword always overrides this.
+
+    Checks both project_description and additional_notes for equity keywords,
+    because teachers often mention community context in the notes field.
+    Safe against None or empty inputs.
+    """
+    text = _safe_lower(project_description, additional_notes)
+
+    equity_keywords = [
+        "underserved", "low-income", "title i", "title 1",
+        "food desert", "environmental justice", "frontline", "marginalized",
+        "tribal", "indigenous", "refugee", "immigrant community",
+    ]
+    has_equity_keywords = any(k in text for k in equity_keywords)
+
+    # Title I is the strongest signal — always returns True.
+    # _is_title1() normalises "yes", "YES", True, 1 safely.
+    if _is_title1(teacher_context):
+        return True
+
+    if has_equity_keywords:
+        return True
+
+    # POC heuristic: private / Montessori schools with no positive equity signal
+    # are conservatively assumed not to serve underserved communities.
+    # This can be upgraded with real data in production.
+    private_types = {SchoolType.PRIVATE, SchoolType.MONTESSORI}
+    if (
+        teacher_context.school_type in private_types
+        and not _is_title1(teacher_context)
+        and not has_equity_keywords
+    ):
+        return False
+
+    return None
+
+
+# ─────────────────────────────────────────
 # MAIN ENTRY POINT
 # ─────────────────────────────────────────
 
@@ -682,7 +920,8 @@ def process_submission(
     Take a raw teacher submission and return a fully structured ProjectState.
 
     Agent 2 writes:
-        - state.structured_intake  (lab match, student count, track, partners, grade_band)
+        - state.structured_intake  (lab match, student count, track, partners, grade_band,
+                                    project_type, sustained_action, equity_flag)
         - state.teacher_context    (passed through or defaulted)
         - state.warnings           (low confidence flags)
         - state.phase              (advances to PLANNING)
@@ -700,9 +939,11 @@ def process_submission(
     Returns:
         ProjectState with structured_intake fully populated
     """
+    _teacher_context = teacher_context or TeacherContext()
+
     state = ProjectState(
         raw_input=raw_input,
-        teacher_context=teacher_context or TeacherContext(),
+        teacher_context=_teacher_context,
     )
 
     # ── Step 1: Fuzzy lab name matching ──────────────────────────────
@@ -790,6 +1031,19 @@ def process_submission(
         thematic_topic=thematic_topic,
         community_partnerships=partners,
         grade_band=grade_band,
+        project_type=infer_project_type(
+            raw_input.raw_project_description,
+            canonical_name,
+        ),
+        sustained_action=infer_sustained_action(
+            raw_input.raw_project_description,
+            raw_input.raw_additional_notes,
+        ),
+        equity_flag=infer_equity_flag(
+            _teacher_context,
+            raw_input.raw_project_description,
+            raw_input.raw_additional_notes,
+        ),
     )
 
     # ── Finalize state ────────────────────────────────────────────────
