@@ -20,6 +20,8 @@ from agent1_agent2_adapter import (
     _resolve_additional_notes,
     _first_lab_from_chunks,
     _first_lab_from_matched,
+    _normalise_lab_name,
+    _extract_student_count_from_message,
 )
 from project_state import (
     RawInput,
@@ -309,10 +311,25 @@ class TestAdaptAgent1ToRawInput:
         result = adapt_agent1_to_raw_input(msg, "Agent 1 guidance response", meta)
         assert result.raw_project_description == msg
 
-    def test_student_count_always_blank(self):
-        """Agent 1 never provides student count — must always be empty."""
+    def test_student_count_extracted_when_mentioned(self):
+        """If teacher mentions student count in message, adapter should extract it."""
         meta = _teacher_metadata()
-        result = adapt_agent1_to_raw_input("30 students composting", "response", meta)
+        result = adapt_agent1_to_raw_input(
+            "We have about 25 students in this class",
+            "Agent 1 response",
+            meta,
+        )
+        assert result.raw_student_count_text != ""
+        assert "25" in result.raw_student_count_text
+
+    def test_student_count_blank_when_not_mentioned(self):
+        """If teacher doesn't mention student count, raw_student_count_text stays empty."""
+        meta = _teacher_metadata()
+        result = adapt_agent1_to_raw_input(
+            "I want to do a composting project",
+            "Agent 1 response",
+            meta,
+        )
         assert result.raw_student_count_text == ""
 
     def test_community_partners_always_blank(self):
@@ -675,3 +692,105 @@ class TestPipelineWrapper:
         )
         assert state.teacher_context.school_name == "Ahfachkee Day School"
         assert state.teacher_context.school_type == SchoolType.TRIBAL
+
+
+# ═════════════════════════════════════════
+# 6. _NORMALISE_LAB_NAME
+# ═════════════════════════════════════════
+
+class TestNormaliseLabName:
+
+    def test_ampersand_replaced_with_and(self):
+        assert _normalise_lab_name("Agriculture & Climate Change") == "Agriculture and Climate Change"
+
+    def test_civics_ampersand(self):
+        assert _normalise_lab_name("Civics & Climate Action") == "Civics and Climate Action"
+
+    def test_already_correct_unchanged(self):
+        assert _normalise_lab_name("Agriculture and Climate Change") == "Agriculture and Climate Change"
+
+    def test_empty_string_safe(self):
+        assert _normalise_lab_name("") == ""
+
+    def test_none_safe(self):
+        assert _normalise_lab_name(None) is None
+
+    def test_resolve_lab_name_normalises_target_lab(self):
+        """_resolve_lab_name must normalise & → and from target_lab."""
+        meta = _teacher_metadata(target_lab="Agriculture & Climate Change")
+        result = _resolve_lab_name(meta, "message")
+        assert result == "Agriculture and Climate Change"
+
+    def test_resolve_lab_name_normalises_matched_labs(self):
+        """Fallback through matched_labs should also normalise."""
+        meta = _teacher_metadata(target_lab="", matched_labs=["Civics & Climate Action"])
+        result = _resolve_lab_name(meta, "message")
+        assert result == "Civics and Climate Action"
+
+
+# ═════════════════════════════════════════
+# 7. _EXTRACT_STUDENT_COUNT_FROM_MESSAGE
+# ═════════════════════════════════════════
+
+class TestExtractStudentCountFromMessage:
+
+    def test_about_N_students(self):
+        result = _extract_student_count_from_message(
+            "I want to run this with about 25 students."
+        )
+        assert "25" in result
+
+    def test_N_students_no_approximation(self):
+        result = _extract_student_count_from_message("30 students in my class")
+        assert "30" in result
+
+    def test_approximately_N(self):
+        result = _extract_student_count_from_message(
+            "approximately 40 students will participate"
+        )
+        assert "40" in result
+
+    def test_around_N_no_label(self):
+        result = _extract_student_count_from_message(
+            "I have around 20 in each section"
+        )
+        assert "20" in result
+
+    def test_no_number_returns_empty(self):
+        result = _extract_student_count_from_message(
+            "I want to run the agriculture lab with my class"
+        )
+        assert result == ""
+
+    def test_empty_message_returns_empty(self):
+        assert _extract_student_count_from_message("") == ""
+
+    def test_real_teacher_message_extracts_correctly(self):
+        msg = (
+            "I teach 9th grade Environmental Science at a Title I school in Norwalk, CT. "
+            "We want to build a composting system with about 25 students."
+        )
+        result = _extract_student_count_from_message(msg)
+        assert "25" in result
+
+    def test_extracted_count_feeds_agent2_normalisation(self):
+        """The extracted text should parse correctly through Agent 2."""
+        from agent2 import normalize_student_count
+        msg = "We plan to do this with about 25 students in my class."
+        extracted = _extract_student_count_from_message(msg)
+        _, _, estimate = normalize_student_count(extracted)
+        assert estimate == 25
+
+    def test_full_pipeline_has_nonzero_reach(self):
+        """When teacher mentions count, reach_estimate should not be 0."""
+        from agent2 import process_submission
+        meta = _teacher_metadata(target_lab="Agriculture and Climate Change")
+        ctx  = _make_teacher_context()
+        raw  = adapt_agent1_to_raw_input(
+            "I want to do a composting project with about 25 students.",
+            "Agent 1 response",
+            meta,
+            ctx,
+        )
+        state = process_submission(raw, teacher_context=ctx)
+        assert state.structured_intake.num_students_estimate == 25

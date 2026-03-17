@@ -140,20 +140,83 @@ def _resolve_lab_name(metadata: dict, original_message: str) -> str:
     # Priority 1: target_lab
     target = _safe(metadata.get("target_lab", ""))
     if target:
-        return target
+        return _normalise_lab_name(target)
 
     # Priority 2: matched_labs from standards_result
     standards = metadata.get("standards_result") or {}
     matched = standards.get("matched_labs") or []
     first_matched = _first_lab_from_matched(matched)
     if first_matched:
-        return first_matched
+        return _normalise_lab_name(first_matched)
 
     # Priority 3: first retrieved chunk
     chunks = metadata.get("retrieved_chunks") or []
     first_chunk = _first_lab_from_chunks(chunks)
     if first_chunk:
         return first_chunk
+
+    return ""
+
+
+def _normalise_lab_name(name: str) -> str:
+    """
+    Normalise Agent 1's lab name variants to match Agent 2's canonical forms.
+
+    Agent 1's standards_router may return shortened or ampersand-form names
+    (e.g. "Agriculture & Climate Change", "Civics & Climate Action") because
+    its lab registry predates Agent 2's canonical alias table.
+
+    This normalisation is shallow — it handles the known & → and pattern.
+    Agent 2's fuzzy matcher handles anything else; this just improves the
+    confidence score from ~0.90 to 1.0 for the most common variants.
+    """
+    if not name:
+        return name
+    return name.replace(" & ", " and ")
+
+
+def _extract_student_count_from_message(message: str) -> str:
+    """
+    Attempt a lightweight extraction of student count from the teacher's
+    original message. Returns the matched text fragment if found, else "".
+
+    This is intentionally narrow — we only extract patterns that are
+    unambiguously about student count. We never guess or invent a number.
+    Patterns covered:
+        "about 25 students", "25 students", "~30 kids", "30 pupils",
+        "around 20", "approximately 25 students"
+
+    The extracted text is passed to raw_student_count_text so that Agent 2's
+    normalize_student_count() can parse it properly — we do not parse it
+    ourselves here.
+
+    Why do this here rather than leaving it blank?
+    Because the teacher typed the student count in their message to Agent 1.
+    Not surfacing it to Agent 2 means reach_estimate stays at 0 and the
+    funder summary reads "a group of students" instead of "25 students".
+    This is the single biggest quality gap in the live test output.
+    """
+    import re
+    # Match: optional approximation word + number + optional student label
+    pattern = re.compile(
+        r'(?:about|around|approximately|roughly|~)?\s*'
+        r'(\d[\d,]*)\s*'
+        r'(?:students?|kids?|pupils?|learners?|participants?)',
+        re.IGNORECASE,
+    )
+    m = pattern.search(message)
+    if m:
+        # Return the full matched span so normalize_student_count() gets context
+        return m.group(0).strip()
+
+    # Fallback: approximation word + bare number (no student label)
+    approx_pattern = re.compile(
+        r'(?:about|around|approximately|roughly)\s+(\d[\d,]*)\b',
+        re.IGNORECASE,
+    )
+    m2 = approx_pattern.search(message)
+    if m2:
+        return m2.group(0).strip()
 
     return ""
 
@@ -311,15 +374,23 @@ def adapt_agent1_to_raw_input(
         parts = [p for p in [city, state, country] if p]
         raw_location = ", ".join(parts)
 
-    # ── Fields Agent 1 never provides ────────────────────────────────────────
-    # Student count: Agent 1 does not ask for this — left blank.
-    # Community partners: Agent 1 does not extract these — left blank.
+    # ── Student count ──────────────────────────────────────────────────────────
+    # Agent 1 does not ask for student count explicitly, but the teacher often
+    # mentions it in their message. Extract it as a text fragment and pass it
+    # to Agent 2's normalize_student_count() rather than leaving reach at 0.
+    # If nothing is found, raw_student_count_text stays "" — that is correct.
+    raw_student_count_text = _extract_student_count_from_message(
+        _safe(original_message)
+    )
+
+    # ── Community partners ────────────────────────────────────────────────────
+    # Agent 1 does not extract community partners — left blank.
     # The teacher will provide these through subsequent turns or the Jotform.
 
     return RawInput(
         raw_lab_name=raw_lab_name,
         raw_project_description=raw_project_description,
-        raw_student_count_text="",      # Agent 1 never provides this
+        raw_student_count_text=raw_student_count_text,
         raw_additional_notes=raw_additional_notes,
         raw_community_partners="",      # Agent 1 never provides this
         raw_location=raw_location,
