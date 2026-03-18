@@ -208,10 +208,12 @@ def _extract_student_count_from_message(message: str) -> str:
         return m_bet.group(0).strip()
 
     # Priority 2: optional approximation word + number + student label
+    # Includes "graders" to catch "28 ninth graders", "30 tenth graders" etc.
     pattern = re.compile(
         r'(?:about|around|approximately|roughly|~)?\s*'
         r'(\d[\d,]*)\s*'
-        r'(?:students?|kids?|pupils?|learners?|participants?)',
+        r'(?:(?:first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth)\s+)?'
+        r'(?:students?|kids?|pupils?|learners?|participants?|graders?)',
         re.IGNORECASE,
     )
     m = pattern.search(message)
