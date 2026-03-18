@@ -197,7 +197,17 @@ def _extract_student_count_from_message(message: str) -> str:
     This is the single biggest quality gap in the live test output.
     """
     import re
-    # Match: optional approximation word + number + optional student label
+    # Priority 1: "between 20 and 30 students" / "between 20-30 students"
+    between_pattern = re.compile(
+        r'between\s+(\d[\d,]*)\s+(?:and|-)\s+(\d[\d,]*)'
+        r'(?:\s*(?:students?|kids?|pupils?|learners?|participants?))?',
+        re.IGNORECASE,
+    )
+    m_bet = between_pattern.search(message)
+    if m_bet:
+        return m_bet.group(0).strip()
+
+    # Priority 2: optional approximation word + number + student label
     pattern = re.compile(
         r'(?:about|around|approximately|roughly|~)?\s*'
         r'(\d[\d,]*)\s*'
@@ -421,7 +431,7 @@ def build_raw_input_from_message(
     return RawInput(
         raw_lab_name="",
         raw_project_description=_safe(original_message),
-        raw_student_count_text="",
+        raw_student_count_text=_extract_student_count_from_message(_safe(original_message)),
         raw_additional_notes="",
         raw_community_partners="",
         raw_location=raw_location,

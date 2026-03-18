@@ -686,7 +686,7 @@ JSON array only, no other text:"""
         ]
 
     except Exception as e:
-        logger.warning(f"LLM partner extraction failed, falling back to heuristic: {e}")
+        logger.debug(f"LLM partner extraction unavailable, using heuristic: {e}")
         return _extract_partners_heuristic(narrative)
 
 
