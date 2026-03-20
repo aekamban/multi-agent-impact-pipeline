@@ -286,7 +286,7 @@ def normalize_student_count(raw_text: str) -> tuple[Optional[int], Optional[int]
     # Avoids returning class count instead of student count for
     # "2 classes of 30 students" or "3 sections, 90 students total".
     _student_label = re.search(
-        r'(\d+)\s*(?:students?|kids?|pupils?|learners?|participants?)\b',
+        r'(\d+)\s*(?:students?|kids?|pupils?|learners?|participants?|graders?)\b',
         text, re.IGNORECASE
     )
     _total_label = re.search(

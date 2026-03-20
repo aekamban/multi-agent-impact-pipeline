@@ -491,7 +491,7 @@ with tab_teacher:
                     with m_col3:
                         comm = getattr(im, "community_score_total", None)
                         if comm is not None:
-                            st.metric("Community score", f"{comm:.1f}/10")
+                            st.metric("Community score", f"{comm:.1f}/100")
 
                     method = getattr(im, "methodology_notes", "")
                     if method:
