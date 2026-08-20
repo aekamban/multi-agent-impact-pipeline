@@ -17,158 +17,252 @@ import streamlit as st
 # ─── Page config must be first Streamlit call ─────────────────────────────────
 st.set_page_config(
     page_title="TCImpact",
-    page_icon="🌿",
+    page_icon="🌱",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
-# ─── Custom CSS ───────────────────────────────────────────────────────────────
+# ─── Custom CSS — TCI brand system, light theme ───────────────────────────────
 st.markdown("""
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-  html, body, [class*="css"] {
-    font-family: 'DM Sans', sans-serif;
+  /* ── Page background — targeted, not global ── */
+  [data-testid="stApp"],
+  [data-testid="stAppViewContainer"],
+  [data-testid="stMain"],
+  .main,
+  .block-container {
+    background-color: #FFFFFF !important;
   }
 
+  .block-container {
+    padding-top: 3rem !important;
+    padding-bottom: 4rem !important;
+    max-width: 1100px !important;
+  }
+
+  section[data-testid="stSidebar"] { display: none; }
+
+  /* ── Typography — scoped to markdown content only, not all elements ── */
+  /* DO NOT apply font-family to span/div/li globally — breaks Material icon ligatures */
+  .stMarkdown,
+  .stMarkdown p,
+  [data-testid="stCaptionContainer"] p,
+  h1, h2, h3, h4 {
+    font-family: 'Inter', sans-serif !important;
+    color: #1A1A1A !important;
+  }
+
+  [data-testid="stCaptionContainer"] p { color: #4A4A4A !important; font-size: 0.85rem !important; }
+
+  /* ── Header accent band ── */
+  [data-testid="stHeader"] { background-color: #FFFFFF !important; border-bottom: 1px solid #E5E7EB !important; }
+
+  /* ── Wordmark ── */
   .tci-wordmark {
-    font-family: 'DM Serif Display', serif;
-    font-size: 2rem;
-    color: #1a4731;
-    letter-spacing: -0.5px;
-    margin: 0;
-    line-height: 1;
+    font-family: 'Inter', sans-serif;
+    font-size: 1.5rem; font-weight: 700; color: #2F7F84;
+    letter-spacing: -0.3px; margin: 0; line-height: 1.2;
+    padding-top: 4px;
   }
   .tci-tagline {
-    font-size: 0.8rem;
-    color: #6b8f71;
-    font-weight: 300;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-top: 2px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.7rem; color: #6B7280; font-weight: 400;
+    letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px;
   }
 
+  /* ── Offline banner ── */
   .offline-banner {
-    background: #fff8e1;
-    border-left: 4px solid #f9a825;
-    padding: 10px 16px;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    color: #5d4037;
-    margin-bottom: 16px;
+    background: #FFFBEB; border-left: 4px solid #F59E0B;
+    padding: 10px 16px; border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem; color: #92400E; margin-bottom: 16px;
   }
 
-  .agent-response {
-    background: #f0f7f2;
-    border-left: 4px solid #2e7d52;
-    border-radius: 6px;
-    padding: 18px 20px;
-    font-size: 0.95rem;
-    line-height: 1.7;
-    color: #1c3a28;
-    white-space: pre-wrap;
-    margin-bottom: 8px;
-  }
-
-  .student-response {
-    background: #f3f8f4;
-    border-left: 4px solid #43a066;
-    border-radius: 6px;
-    padding: 18px 20px;
-    font-size: 0.95rem;
-    line-height: 1.7;
-    color: #1c3a28;
-    white-space: pre-wrap;
-    margin-bottom: 8px;
-  }
-
-  .metric-pill {
-    display: inline-block;
-    background: #e8f5ec;
-    border: 1px solid #b8ddc3;
-    border-radius: 20px;
-    padding: 4px 14px;
-    font-size: 0.8rem;
-    color: #2e7d52;
-    font-weight: 500;
-    margin: 3px 4px 3px 0;
-  }
-
-  .section-label {
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #6b8f71;
-    margin-bottom: 6px;
-  }
-
-  .privacy-note {
-    background: #fafafa;
-    border: 1px dashed #ccc;
-    border-radius: 4px;
-    padding: 10px 14px;
-    font-size: 0.8rem;
-    color: #888;
-    margin-top: 8px;
-  }
-
+  /* ── Tabs — TCI teal accent ── */
   button[data-baseweb="tab"] {
-    font-family: 'DM Sans', sans-serif !important;
     font-weight: 500 !important;
+    font-size: 0.9rem !important;
+    color: #4A4A4A !important;
+  }
+  button[data-baseweb="tab"][aria-selected="true"] {
+    color: #2F7F84 !important;
+    font-weight: 600 !important;
+  }
+  [data-testid="stTabs"] [role="tablist"] {
+    border-bottom: 2px solid #E5E7EB !important;
   }
 
+  /* ── Input fields — white with visible border ── */
+  [data-testid="stTextInput"] input {
+    background-color: #FFFFFF !important;
+    color: #1A1A1A !important;
+    border: 1px solid #D1D5DB !important;
+    border-radius: 6px !important;
+    font-family: 'Inter', sans-serif !important;
+  }
+  [data-testid="stTextArea"] textarea {
+    background-color: #FFFFFF !important;
+    color: #1A1A1A !important;
+    border: 1px solid #D1D5DB !important;
+    border-radius: 6px !important;
+    font-family: 'Inter', sans-serif !important;
+  }
+  [data-testid="stSelectbox"] > div > div {
+    background-color: #FFFFFF !important;
+    color: #1A1A1A !important;
+    border: 1px solid #D1D5DB !important;
+    border-radius: 6px !important;
+  }
+
+  /* ── Expanders — white cards with green left accent ── */
+  /* Scoped ONLY to the container, NOT to summary text to avoid icon ligature bugs */
+  [data-testid="stExpander"] {
+    background-color: #FFFFFF !important;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 8px !important;
+    margin-bottom: 8px !important;
+  }
+  /* Expander header background only — do NOT set font-family here */
+  details > summary {
+    background-color: #FFFFFF !important;
+    border-radius: 8px !important;
+    padding: 4px 0 !important;
+  }
+  details[open] > summary {
+    border-bottom: 1px solid #F3F4F6 !important;
+  }
+
+  /* ── Metrics — teal values ── */
+  [data-testid="stMetricValue"]  { color: #2F7F84 !important; font-weight: 600 !important; }
+  [data-testid="stMetric"] label { color: #4A4A4A !important; font-size: 0.8rem !important; }
+
+  /* ── Alert boxes ── */
+  [data-testid="stAlert"] { border-radius: 8px !important; }
+
+  /* ── Chat input ── */
+  [data-testid="stChatInput"] textarea {
+    background-color: #FFFFFF !important;
+    color: #1A1A1A !important;
+    border: 1px solid #D1D5DB !important;
+    font-family: 'Inter', sans-serif !important;
+  }
+
+  /* ── Divider ── */
+  hr { border-color: #E5E7EB !important; margin: 32px 0 !important; }
+
+  /* ═══════════════════════════════════════════
+     CUSTOM CONTENT COMPONENTS
+  ═══════════════════════════════════════════ */
+
+  /* ── Section labels — TCI green rule above ── */
+  .section-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: #2F7F84;
+    border-top: 2px solid #6BA539;
+    padding-top: 16px; margin-bottom: 16px; margin-top: 40px;
+    display: block;
+  }
+
+  /* ── Privacy note — pale teal tint ── */
+  .privacy-note {
+    font-family: 'Inter', sans-serif;
+    background: #F0F9FA; border: 1px solid #C5DFE1; border-radius: 8px;
+    padding: 12px 16px; font-size: 0.8rem; color: #374151;
+    margin-top: 16px; line-height: 1.6;
+  }
+
+  /* ── User message — right-aligned feel, light gray ── */
+  .user-message {
+    font-family: 'Inter', sans-serif;
+    background: #F3F4F6; border: 1px solid #E5E7EB;
+    border-radius: 10px 10px 2px 10px;
+    padding: 14px 18px; font-size: 0.9rem; line-height: 1.65;
+    color: #1A1A1A; margin: 8px 0 8px 10%;
+  }
+
+  /* ── Assistant response — green left accent ── */
+  .agent-response {
+    font-family: 'Inter', sans-serif;
+    background: #FFFFFF; border: 1px solid #E5E7EB;
+    border-left: 4px solid #6BA539; border-radius: 2px 10px 10px 2px;
+    padding: 20px 24px; font-size: 0.9rem; line-height: 1.75;
+    color: #1A1A1A; white-space: pre-wrap; margin: 8px 0;
+  }
+
+  /* ── Student response — teal left accent ── */
+  .student-response {
+    font-family: 'Inter', sans-serif;
+    background: #FFFFFF; border: 1px solid #C5DFE1;
+    border-left: 4px solid #2F7F84; border-radius: 2px 10px 10px 2px;
+    padding: 20px 24px; font-size: 0.9rem; line-height: 1.75;
+    color: #1A1A1A; white-space: pre-wrap; margin: 8px 0;
+  }
+
+  /* ── Intake pills — teal tone ── */
+  .metric-pill {
+    font-family: 'Inter', sans-serif;
+    display: inline-block; background: #E6F2F3;
+    border: 1px solid #A8D1D4; border-radius: 999px;
+    padding: 4px 14px; font-size: 0.78rem; color: #1D6B70;
+    font-weight: 500; margin: 3px 4px 3px 0;
+  }
+
+  /* ── Funder summary — TCI teal box ── */
   .funder-box {
-    background: #1a4731;
-    color: #d4edda;
-    border-radius: 8px;
-    padding: 20px 24px;
-    font-size: 0.9rem;
-    line-height: 1.75;
+    font-family: 'Inter', sans-serif;
+    background: #2F7F84; color: #FFFFFF; border-radius: 12px;
+    padding: 24px 28px; font-size: 0.92rem; line-height: 1.8;
     white-space: pre-wrap;
   }
 
+  /* ── Logic model ── */
   .logic-box {
-    background: #f9fbf9;
-    border: 1px solid #c8dece;
-    border-radius: 6px;
-    padding: 16px 20px;
-    font-size: 0.88rem;
-    line-height: 1.65;
-    color: #2a4a35;
-    white-space: pre-wrap;
+    font-family: 'Inter', sans-serif;
+    background: #FAFAFA; border: 1px solid #E5E7EB;
+    border-left: 3px solid #6BA539;
+    border-radius: 4px 8px 8px 4px;
+    padding: 20px 24px; font-size: 0.85rem; line-height: 1.75;
+    color: #1A1A1A; white-space: pre-wrap;
   }
 
+  /* ── Map export / JSON ── */
   .json-box {
-    background: #1e2a22;
-    color: #7ec89a;
-    border-radius: 6px;
-    padding: 16px;
     font-family: 'Courier New', monospace;
-    font-size: 0.8rem;
-    overflow-x: auto;
-    white-space: pre;
+    background: #F8FAFC; border: 1px solid #E5E7EB; border-radius: 8px;
+    padding: 20px 24px; font-size: 0.8rem; color: #1A1A1A;
+    overflow-x: auto; white-space: pre;
   }
 
+  /* ── Dashboard metric cards ── */
   .dash-card {
-    background: white;
-    border: 1px solid #ddeee3;
-    border-radius: 8px;
-    padding: 18px 20px;
-    text-align: center;
+    background: #FFFFFF; border: 1px solid #E5E7EB;
+    border-top: 3px solid #2F7F84;
+    border-radius: 8px; padding: 20px 24px; text-align: center;
   }
   .dash-card .value {
-    font-family: 'DM Serif Display', serif;
-    font-size: 2rem;
-    color: #1a4731;
-    line-height: 1.1;
+    font-family: 'Inter', sans-serif;
+    font-size: 2.2rem; font-weight: 600; color: #2F7F84; line-height: 1.1;
   }
   .dash-card .label {
-    font-size: 0.75rem;
-    color: #6b8f71;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-top: 4px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.7rem; font-weight: 600; color: #6B7280;
+    text-transform: uppercase; letter-spacing: 0.1em; margin-top: 6px;
+  }
+
+  /* ── Jotform field display ── */
+  .jf-field-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.7rem; font-weight: 700; color: #2F7F84;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    margin-bottom: 4px; margin-top: 20px;
+  }
+  .jf-field-value {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem; color: #1A1A1A; line-height: 1.6;
+    padding-bottom: 16px; border-bottom: 1px solid #F3F4F6;
   }
 </style>
 """, unsafe_allow_html=True)
@@ -224,10 +318,22 @@ def _display(value) -> str:
         return "—"
     if isinstance(value, bool):
         return "Yes" if value else "No"
-    # str enums have a .value attribute giving the raw string e.g. "high", "B"
     if hasattr(value, "value"):
         return str(value.value).replace("_", " ").title()
     return str(value)
+
+
+def _clean_map_json(map_json: dict) -> dict:
+    """Normalize enum reprs to plain strings for JSON display (e.g. GradeBand.HIGH → 'high')."""
+    clean = {}
+    for k, v in map_json.items():
+        if hasattr(v, "value"):
+            clean[k] = v.value
+        elif isinstance(v, str) and "." in v and v.split(".")[0][:1].isupper():
+            clean[k] = v.split(".")[-1].lower()
+        else:
+            clean[k] = v
+    return clean
 
 
 # ─── Session state init ────────────────────────────────────────────────────────
@@ -250,7 +356,7 @@ LIVE_LLM = os.getenv("LIVE_LLM", "").strip() == "1"
 col_logo, _ = st.columns([3, 7])
 with col_logo:
     st.markdown("""
-    <p class="tci-wordmark">🌿 TCImpact</p>
+    <p class="tci-wordmark">TCImpact</p>
     <p class="tci-tagline">The Climate Initiative · Learning Lab Companion</p>
     """, unsafe_allow_html=True)
 
@@ -259,16 +365,15 @@ st.markdown("---")
 if not LIVE_LLM:
     st.markdown("""
     <div class="offline-banner">
-      ⚠️ <strong>Offline mode</strong> — set <code>LIVE_LLM=1</code> to enable the AI assistant.
-      Agents 2 → 4 (intake, impact calculation, funder summary) still run from your message text.
+      <strong>Note:</strong> The AI assistant is currently offline. Structured outputs (intake, impact metrics, reporting) will still generate from your message text. Set <code>LIVE_LLM=1</code> to enable the full AI experience.
     </div>
     """, unsafe_allow_html=True)
 
 # ─── Tabs ──────────────────────────────────────────────────────────────────────
 tab_teacher, tab_student, tab_dashboard = st.tabs([
-    "🏫  Teacher Mode",
-    "🌱  Student Mode",
-    "📊  Impact Dashboard",
+    "Teacher Mode",
+    "Student Mode",
+    "Impact Dashboard",
 ])
 
 
@@ -285,7 +390,7 @@ with tab_teacher:
     )
 
     # ── Context form ──────────────────────────────────────────────────────────
-    with st.expander("⚙️  Your classroom context", expanded=not bool(st.session_state.pipeline_result)):
+    with st.expander("Your classroom context", expanded=not bool(st.session_state.pipeline_result)):
         ctx_col1, ctx_col2, ctx_col3 = st.columns(3)
         with ctx_col1:
             t_subject  = st.text_input("Subject area", value="Environmental Science", key="t_subject")
@@ -305,7 +410,7 @@ with tab_teacher:
 
     # Demo toggle: pass jotform_submitted=True to agent4 to unlock map export
     jotform_submitted_demo = st.checkbox(
-        "📋  Preview as Jotform-submitted (unlocks Moore Foundation map export for demo)",
+        "Preview as Jotform-submitted (unlocks Moore Foundation map export for demo)",
         value=False,
         key="jotform_submitted_demo",
     )
@@ -313,17 +418,14 @@ with tab_teacher:
     # ── Chat history display ──────────────────────────────────────────────────
     for role, text in st.session_state.teacher_chat:
         if role == "user":
-            st.chat_message("user").write(text)
+            st.markdown(f'<div class="user-message">{text}</div>', unsafe_allow_html=True)
         else:
-            st.chat_message("assistant").markdown(
-                f'<div class="agent-response">{text}</div>', unsafe_allow_html=True
-            )
+            st.markdown(f'<div class="agent-response">{text}</div>', unsafe_allow_html=True)
 
     st.markdown(
-        '<div class="privacy-note">🔒 <strong>Privacy reminder:</strong> '
-        "Please do not enter student names, photos, videos, email addresses, or home addresses. "
-        "TCImpact drafts project reporting only — sensitive details and media should be submitted "
-        "directly through TCI's official Jotform.</div>",
+        '<div class="privacy-note"><strong>Privacy:</strong> '
+        "Please do not include student names, photos, videos, email addresses, or home addresses. "
+        "This tool is designed for project reporting only. Personal details and media should be submitted directly through TCI's official Jotform.</div>",
         unsafe_allow_html=True,
     )
 
@@ -334,7 +436,7 @@ with tab_teacher:
 
     if teacher_input:
         st.session_state.teacher_chat.append(("user", teacher_input))
-        st.chat_message("user").write(teacher_input)
+        st.markdown(f'<div class="user-message">{teacher_input}</div>', unsafe_allow_html=True)
 
         # ── Build TeacherContext ──────────────────────────────────────────────
         # Verified against project_state.py:
@@ -345,7 +447,7 @@ with tab_teacher:
             from project_state import TeacherContext, SchoolLocale, SchoolType
         except ImportError as e:
             st.error(
-                f"❌ Could not import project_state: {e}\n\n"
+                f"Could not import project_state: {e}\n\n"
                 "Make sure project_state.py is in the same directory as app.py."
             )
             st.stop()
@@ -393,12 +495,12 @@ with tab_teacher:
 
             except ImportError as e:
                 st.error(
-                    f"❌ Could not import pipeline: {e}\n\n"
+                    f"Could not import pipeline: {e}\n\n"
                     "Check that pipeline_agent1_to_4.py and all agent files are present."
                 )
                 st.stop()
             except Exception as e:
-                st.error(f"❌ Pipeline error: {e}")
+                st.error(f"Pipeline error: {e}")
                 agent1_resp = (
                     "Something went wrong running the pipeline. "
                     "Check the error above — all agent files must be in the working directory."
@@ -407,14 +509,12 @@ with tab_teacher:
                 st.session_state.pipeline_result = None
 
         st.session_state.teacher_chat.append(("assistant", agent1_resp))
-        st.chat_message("assistant").markdown(
-            f'<div class="agent-response">{agent1_resp}</div>', unsafe_allow_html=True
-        )
+        st.markdown(f'<div class="agent-response">{agent1_resp}</div>', unsafe_allow_html=True)
 
         # Clarification signal — surface before downstream panels
         if isinstance(metadata, dict) and metadata.get("clarification_returned"):
             st.info(
-                "⚠️ We need a bit more detail to fully structure your project. "
+                "To generate your project summary, we need a few more details. "
                 "You can still see a draft below — add more information in your next message to improve it."
             )
 
@@ -424,15 +524,24 @@ with tab_teacher:
             im  = getattr(final_state, "impact_metrics", None)
             rep = getattr(final_state, "reporting", None)
 
-            # ── Structured Intake ─────────────────────────────────────────────
-            if si is not None:
-                with st.expander("🗂️  Structured intake — what was extracted from your message"):
+            # ════════════════════════════════════════════
+            # SECTION A — CURRICULUM SUPPORT
+            # (Agent 1 response already shown above in chat)
+            # ════════════════════════════════════════════
 
+            # ════════════════════════════════════════════
+            # SECTION B — PROJECT IMPACT
+            # ════════════════════════════════════════════
+            st.markdown('<p class="section-label">Your Project</p>', unsafe_allow_html=True)
+
+            # What we understood
+            if si is not None:
+                with st.expander("What we understood from your project", expanded=True):
                     conf = getattr(si, "lab_match_confidence", None)
                     if conf is not None and conf < 0.8:
                         st.warning(
-                            f"⚠️ Lab name match confidence is low ({conf:.0%}). "
-                            "Consider clarifying which TCI learning lab you used."
+                            f"We had difficulty matching your learning lab name (confidence: {conf:.0%}). "
+                            "Consider clarifying which TCI learning lab you are running."
                         )
 
                     pills_html = ""
@@ -445,8 +554,8 @@ with tab_teacher:
                         pills_html += f'<span class="metric-pill">Track {_display(track)}</span>'
 
                     students = getattr(si, "num_students_estimate", None)
-                    if students is not None:             # explicit None check — 0 is valid
-                        pills_html += f'<span class="metric-pill">~{students} students</span>'
+                    if students is not None:
+                        pills_html += f'<span class="metric-pill">{students} students</span>'
 
                     ptype = getattr(si, "project_type", None)
                     if ptype:
@@ -457,28 +566,28 @@ with tab_teacher:
                         pills_html += f'<span class="metric-pill">{_display(grade)}</span>'
 
                     if getattr(si, "equity_flag", None) is True:
-                        pills_html += '<span class="metric-pill">Equity-flagged ✓</span>'
+                        pills_html += '<span class="metric-pill">Equity focus</span>'
 
                     if getattr(si, "sustained_action", None) is True:
-                        pills_html += '<span class="metric-pill">Sustained action ✓</span>'
+                        pills_html += '<span class="metric-pill">Sustained action</span>'
 
                     if pills_html:
                         st.markdown(pills_html, unsafe_allow_html=True)
                     else:
-                        st.caption("No structured fields extracted yet — share more details about your lab and project.")
+                        st.caption("Share more details about your lab and project to see a summary here.")
 
                     partners = getattr(si, "community_partnerships", [])
                     if partners:
-                        st.markdown("**Community partners identified:**")
+                        st.markdown("<br>**Community partners identified:**", unsafe_allow_html=True)
                         for p in partners:
-                            pname    = getattr(p, "name", "")
+                            pname     = getattr(p, "name", "")
                             ptype_str = getattr(p, "partner_type", "")
                             label = f"{pname} ({ptype_str})" if ptype_str else pname
                             st.markdown(f"- {label}")
 
-            # ── Impact metrics ────────────────────────────────────────────────
+            # Impact metrics
             if im is not None:
-                with st.expander("📈  Impact metrics"):
+                with st.expander("Project impact", expanded=True):
                     m_col1, m_col2, m_col3 = st.columns(3)
                     with m_col1:
                         reach = getattr(im, "reach_estimate", None)
@@ -495,28 +604,31 @@ with tab_teacher:
 
                     method = getattr(im, "methodology_notes", "")
                     if method:
-                        st.caption(f"Methodology: {method}")
+                        st.caption(method)
 
-            # ── Funder summary ────────────────────────────────────────────────
+            # ════════════════════════════════════════════
+            # SECTION C — REPORTING AND EXPORTS
+            # ════════════════════════════════════════════
             if rep is not None:
+                st.markdown('<p class="section-label">Reporting and Exports</p>', unsafe_allow_html=True)
+
                 fs = getattr(rep, "funder_summary", "")
                 if fs:
-                    st.markdown('<p class="section-label">Funder summary</p>', unsafe_allow_html=True)
                     st.markdown(f'<div class="funder-box">{fs}</div>', unsafe_allow_html=True)
+                    st.markdown("<br>", unsafe_allow_html=True)
 
                 lm_text = getattr(rep, "logic_model_text", "")
                 if lm_text:
-                    with st.expander("🔗  Logic model"):
+                    with st.expander("Logic model", expanded=False):
                         st.markdown(f'<div class="logic-box">{lm_text}</div>', unsafe_allow_html=True)
 
-                # ── Jotform draft — explicit allowlist rendering ───────────────
                 jd = getattr(rep, "jotform_draft", None)
                 if jd:
-                    with st.expander("📝  Jotform draft — review before submitting to TCI"):
-                        st.info(
-                            "This draft was auto-generated from your conversations this year. "
+                    with st.expander("Jotform submission draft", expanded=False):
+                        st.caption(
+                            "This draft was prepared from your project information. "
                             "Review each field, then complete your official submission at TCI's Jotform link. "
-                            "**Fields marked ✏️ must be completed directly in the official form.**"
+                            "Personal details, photos, and consent must be added directly in the official form."
                         )
                         if isinstance(jd, dict):
                             rendered_any = False
@@ -524,14 +636,15 @@ with tab_teacher:
                                 value = jd.get(key, "")
                                 if value:
                                     label = JOTFORM_KEY_LABELS.get(key, key)
-                                    st.markdown(f"**{label}**")
-                                    st.write(value)
-                                    st.markdown("---")
+                                    st.markdown(
+                                        f'<p class="jf-field-label">{label}</p>'
+                                        f'<p class="jf-field-value">{value}</p>',
+                                        unsafe_allow_html=True,
+                                    )
                                     rendered_any = True
                             if not rendered_any:
                                 st.caption(
-                                    "Draft fields will populate as you share more details "
-                                    "about your project throughout the year."
+                                    "Draft fields will fill in as you share more about your project."
                                 )
                             privacy_note = jd.get("_privacy_note", "") or _JOTFORM_FALLBACK_PRIVACY
                             blank_fields = jd.get("_blank_fields", [])
@@ -545,12 +658,12 @@ with tab_teacher:
                                     "By submitting this form, you agree that TCI can use this material for promotion, marketing, and dissemination.": "Consent declaration",
                                 }
                                 for bf in blank_fields:
-                                    label = _OMIT_LABELS.get(bf) or (bf[:60] + "…" if len(bf) > 60 else bf)
-                                    omitted_labels.append(label)
+                                    lbl = _OMIT_LABELS.get(bf) or (bf[:60] + "…" if len(bf) > 60 else bf)
+                                    omitted_labels.append(lbl)
                             st.markdown(
-                                f'<div class="privacy-note">🔒 {privacy_note}'
+                                f'<div class="privacy-note">{privacy_note}'
                                 + (
-                                    "<br><strong>Intentionally omitted (complete in official Jotform):</strong> "
+                                    "<br><strong>Complete in official Jotform:</strong> "
                                     + ", ".join(omitted_labels)
                                     if omitted_labels else ""
                                 )
@@ -560,30 +673,38 @@ with tab_teacher:
                         else:
                             st.write(str(jd))
 
-                # ── Map export ────────────────────────────────────────────────
                 map_json = getattr(rep, "map_export_json", None)
-                with st.expander("🗺️  Moore Foundation map export"):
+                with st.expander("Map-ready data export", expanded=False):
                     if map_json:
                         st.markdown(
-                            f'<div class="json-box">{json.dumps(map_json, indent=2)}</div>',
+                            f'<div class="json-box">{json.dumps(_clean_map_json(map_json), indent=2)}</div>',
                             unsafe_allow_html=True,
                         )
                     else:
                         st.markdown(
                             '<div class="privacy-note">'
-                            'Map export JSON is generated once the teacher submits their official Jotform. '
-                            'Use the <strong>Preview as Jotform-submitted</strong> toggle above '
-                            'to see what this export will look like.'
+                            'Map data is generated once you submit your official Jotform. '
+                            'Use the toggle above to preview what this will look like.'
                             '</div>',
                             unsafe_allow_html=True,
                         )
 
-            # ── Pipeline warnings ─────────────────────────────────────────────
+            # Technical details — tucked away for demo
+            tech_items = []
             warnings = getattr(final_state, "warnings", [])
-            if warnings:
-                with st.expander(f"⚠️  {len(warnings)} pipeline warning(s)"):
-                    for w in warnings:
-                        st.warning(w)
+            raw_input = getattr(final_state, "raw_input", None)
+
+            if warnings or raw_input:
+                with st.expander("Technical details (demo only)", expanded=False):
+                    if warnings:
+                        for w in warnings:
+                            st.caption(f"Note: {w}")
+                    if raw_input is not None:
+                        try:
+                            raw_dict = raw_input.model_dump()
+                        except AttributeError:
+                            raw_dict = vars(raw_input) if hasattr(raw_input, "__dict__") else str(raw_input)
+                        st.json(raw_dict)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -597,7 +718,7 @@ with tab_student:
         "No names are collected — your conversations are anonymous."
     )
 
-    with st.expander("📋  Your project context", expanded=not bool(st.session_state.student_chat)):
+    with st.expander("Your project context", expanded=not bool(st.session_state.student_chat)):
         s_col1, s_col2 = st.columns(2)
         with s_col1:
             s_lab = st.selectbox(
@@ -625,11 +746,9 @@ with tab_student:
     # Chat history
     for role, text in st.session_state.student_chat:
         if role == "user":
-            st.chat_message("user").write(text)
+            st.markdown(f'<div class="user-message">{text}</div>', unsafe_allow_html=True)
         else:
-            st.chat_message("assistant").markdown(
-                f'<div class="student-response">{text}</div>', unsafe_allow_html=True
-            )
+            st.markdown(f'<div class="student-response">{text}</div>', unsafe_allow_html=True)
 
     student_input = st.chat_input(
         "What's on your mind about your project?",
@@ -638,7 +757,7 @@ with tab_student:
 
     if student_input:
         st.session_state.student_chat.append(("user", student_input))
-        st.chat_message("user").write(student_input)
+        st.markdown(f'<div class="user-message">{student_input}</div>', unsafe_allow_html=True)
 
         if not LIVE_LLM:
             response = (
@@ -686,24 +805,22 @@ with tab_student:
 
                 except ImportError as e:
                     response = (
-                        f"❌ Could not load the student coach: {e}\n\n"
+                        f"The student coach could not be loaded: {e}\n\n"
                         "Make sure agent1.py is in the same directory as app.py."
                     )
                 except Exception as e:
                     response = (
-                        f"Something went wrong with the student coach: {e}\n\n"
+                        f"Something went wrong: {e}\n\n"
                         "Please check that agent1.py is available and LIVE_LLM=1 is set."
                     )
 
         st.session_state.student_chat.append(("assistant", response))
-        st.chat_message("assistant").markdown(
-            f'<div class="student-response">{response}</div>', unsafe_allow_html=True
-        )
+        st.markdown(f'<div class="student-response">{response}</div>', unsafe_allow_html=True)
 
     st.markdown("""
     <div class="privacy-note" style="margin-top:24px;">
-      🔒 <strong>Student privacy:</strong> No names, emails, or personally identifying information
-      are collected in student mode. Conversations are anonymous by design.
+      <strong>Student privacy:</strong> No names, emails, or personally identifying information
+      are collected in student mode. All conversations are anonymous.
     </div>
     """, unsafe_allow_html=True)
 
@@ -714,20 +831,20 @@ with tab_student:
 with tab_dashboard:
 
     st.markdown("### Impact Dashboard")
-    st.caption("Read-only view of the most recent pipeline run.")
+    st.caption("A summary of the most recent project run.")
 
     result = st.session_state.pipeline_result
 
     if result is None:
         st.info(
-            "No pipeline run yet. Go to **Teacher Mode**, describe your learning lab, "
+            "No project data yet. Go to Teacher Mode, describe your learning lab, "
             "and submit a message to populate this dashboard."
         )
     else:
         _resp, _meta, raw_input, final_state = result
 
         if final_state is None:
-            st.warning("Pipeline ran but did not produce a final state. Check the Teacher Mode tab for errors.")
+            st.warning("Something went wrong with the last run. Please try again in Teacher Mode.")
         else:
             si  = getattr(final_state, "structured_intake", None)
             im  = getattr(final_state, "impact_metrics", None)
@@ -770,7 +887,7 @@ with tab_dashboard:
                 elif reach is not None:
                     metric_v, metric_l = f"{reach:,}", "People Reached"
                 else:
-                    metric_v, metric_l = "—", "Impact Metric"
+                    metric_v, metric_l = "—", "Impact"
                 st.markdown(
                     f'<div class="dash-card"><div class="value" style="font-size:1.4rem">{metric_v}</div>'
                     f'<div class="label">{metric_l}</div></div>',
@@ -780,39 +897,42 @@ with tab_dashboard:
             st.markdown("<br>", unsafe_allow_html=True)
 
             if rep is not None:
+                # Funder summary — most prominent
                 fs = getattr(rep, "funder_summary", "")
                 if fs:
-                    st.markdown('<p class="section-label">Funder Summary</p>', unsafe_allow_html=True)
+                    st.markdown('<p class="section-label">Summary for Reporting and Grants</p>', unsafe_allow_html=True)
                     st.markdown(f'<div class="funder-box">{fs}</div>', unsafe_allow_html=True)
                     st.markdown("<br>", unsafe_allow_html=True)
 
                 lm_text = getattr(rep, "logic_model_text", "")
                 if lm_text:
-                    st.markdown('<p class="section-label">Logic Model</p>', unsafe_allow_html=True)
-                    st.markdown(f'<div class="logic-box">{lm_text}</div>', unsafe_allow_html=True)
-                    st.markdown("<br>", unsafe_allow_html=True)
+                    with st.expander("Logic model", expanded=False):
+                        st.markdown(f'<div class="logic-box">{lm_text}</div>', unsafe_allow_html=True)
 
+                # Map export — lower visual priority
                 map_json = getattr(rep, "map_export_json", None)
-                st.markdown('<p class="section-label">Moore Foundation Map Export</p>', unsafe_allow_html=True)
-                if map_json:
-                    st.markdown(
-                        f'<div class="json-box">{json.dumps(map_json, indent=2)}</div>',
-                        unsafe_allow_html=True,
-                    )
-                else:
-                    st.markdown(
-                        '<div class="privacy-note">Map export JSON is generated after the teacher '
-                        'submits their official Jotform. Enable the <strong>Preview as Jotform-submitted</strong> '
-                        'toggle in Teacher Mode and re-submit to see it here.</div>',
-                        unsafe_allow_html=True,
-                    )
+                with st.expander("Map-ready data export", expanded=False):
+                    if map_json:
+                        st.markdown(
+                            f'<div class="json-box">{json.dumps(_clean_map_json(map_json), indent=2)}</div>',
+                            unsafe_allow_html=True,
+                        )
+                    else:
+                        st.markdown(
+                            '<div class="privacy-note">Map data is generated after the official Jotform is submitted. '
+                            'Use the toggle in Teacher Mode to preview what this will look like.</div>',
+                            unsafe_allow_html=True,
+                        )
             else:
-                st.caption("No reporting data available in this pipeline run.")
+                st.caption("No reporting data available for this project.")
 
-            if raw_input is not None:
-                with st.expander("🔍  Raw input received by Agent 2"):
+            # Technical details — collapsed by default
+            with st.expander("Technical details (demo only)", expanded=False):
+                if raw_input is not None:
                     try:
                         raw_dict = raw_input.model_dump()
                     except AttributeError:
                         raw_dict = vars(raw_input) if hasattr(raw_input, "__dict__") else str(raw_input)
                     st.json(raw_dict)
+                else:
+                    st.caption("No raw input available.")
