@@ -1,6 +1,4 @@
-# TCImpact — Master Project Briefing v3
-# Paste this at the start of every new Claude or ChatGPT conversation
-# Update CURRENT STATUS and CURRENT BRANCH each time
+# TCImpact Project Briefing 
 
 ---
 
@@ -249,13 +247,4 @@ Educator Retreat Demo:
   App includes a "curriculum alignment" flow specifically designed
   to replicate the support TCI's ED provides at retreats
 
-## CURRENT STATUS
-[UPDATE THIS each session]
-Day 2. Schema v2 complete and validated. Azure AI Foundry resource
-tcimpact-hub-ak deployed. Deploying GPT-4.1 and text-embedding-3-large.
-Starting Agent 1 (Learning Lab Expert + Curriculum Integration) next.
-
-## CURRENT BRANCH
-[UPDATE THIS]
-agent-1-learning-lab
 
