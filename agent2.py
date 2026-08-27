@@ -140,7 +140,8 @@ PARTNER_TYPE_KEYWORDS: dict[str, list[str]] = {
     "university": ["university", "college", "institute", "professor", "faculty",
                    "research center", "lab", "academic"],
     "NGO": ["foundation", "nonprofit", "non-profit", "conservancy", "alliance",
-            "coalition", "initiative", "society", "association", "trust", "fund"],
+            "coalition", "initiative", "society", "association", "trust", "fund",
+            "ngo", "non-governmental"],
     "business": ["company", "corp", "inc", "llc", "ltd", "store", "market",
                  "restaurant", "firm", "enterprise", "co."],
     "school": ["school", "district", "classroom", "cafeteria", "principal",
@@ -578,9 +579,23 @@ def _extract_partners_heuristic(narrative: str) -> list[CommunityPartner]:
         r'(?:organization[s]?)[:\s]+([^.\n]+)',
     ]
 
+    # Purpose and relative clauses often follow a partner name without a
+    # comma in between ("partnered with X to set up Y", "worked with X who
+    # helped Z"). Without this, the capture group above runs all the way to
+    # the next comma or period and swallows the rest of the sentence into
+    # the "name." Truncating at the first clause-boundary word keeps the
+    # capture to the actual name.
+    clause_boundary = re.compile(
+        r'\s+\b(?:to|who|which|so\s+that|in\s+order\s+to|before|after|while)\b',
+        flags=re.IGNORECASE,
+    )
+
     for pattern in trigger_patterns:
         for match in re.finditer(pattern, narrative, flags=re.IGNORECASE):
             raw_names = match.group(1).strip()
+            boundary = clause_boundary.search(raw_names)
+            if boundary:
+                raw_names = raw_names[:boundary.start()].strip()
             # Split on commas and semicolons first.
             # Only split on "and" when it clearly separates two short standalone phrases
             # (≤4 words on each side, neither side contains another "and").
@@ -591,6 +606,7 @@ def _extract_partners_heuristic(narrative: str) -> list[CommunityPartner]:
                 cp = cp.strip()
                 and_match = re.search(r'\band\b', cp, flags=re.IGNORECASE)
                 if and_match:
+
                     left = cp[:and_match.start()].strip()
                     right = cp[and_match.end():].strip()
                     left_words = left.split()
@@ -612,6 +628,12 @@ def _extract_partners_heuristic(narrative: str) -> list[CommunityPartner]:
                     parts.append(cp)
             for part in parts:
                 name = part.strip().rstrip('.,;')
+                # Drop a leading article. "the Riverside Food Bank" reads
+                # like a fragment in a funder report; "Riverside Food Bank"
+                # doesn't. Only strips a leading article, not one that's
+                # actually part of the org's name (e.g. leaves "A Team Inc"
+                # alone since there's no space-separated word after "A").
+                name = re.sub(r'^(?:the|a|an)\s+', '', name, flags=re.IGNORECASE)
                 # Filter noise: too short, stopwords, pronouns
                 if len(name) < 3:
                     continue
