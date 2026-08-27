@@ -60,7 +60,6 @@ def insert_teacher(
     country: str = "unknown",
     grade_band: str = "unknown",
     num_students_typical: Optional[int] = None,
-    lab_used_most: Optional[str] = None,
 ) -> int:
     """
     Insert a new teacher record. Name and email are hashed immediately.
@@ -77,12 +76,12 @@ def insert_teacher(
             INSERT INTO teachers (
                 name_hash, email_hash, school_name, school_locale,
                 title1_status, country, grade_band,
-                num_students_typical, lab_used_most
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                num_students_typical
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (name_hash, email_hash, school_name, school_locale,
              title1_status, country, grade_band,
-             num_students_typical, lab_used_most)
+             num_students_typical)
         )
         conn.commit()
         return cursor.lastrowid

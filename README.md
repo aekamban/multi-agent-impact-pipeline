@@ -40,6 +40,22 @@ Running it against the regex fallback (the path that needs no API key and is als
 
 Both are fixed now. Precision on the gold set went from 0 to 0.5 and recall from 0 to 0.3 (F1 0.375, 95% CI on precision [0.19, 0.81] given the small n). That's still an honest, imperfect number, not a victory lap: the fallback still misses partners mentioned without one of its trigger phrases ("the mayor's office sent a representative" isn't caught, since nothing there says "partnered with" or "worked with"), and it still sometimes over-merges multi-word partner names joined by "and" by design, to avoid incorrectly splitting names like "Boys and Girls Club." The harness's job is to make those limitations visible and measurable, not to make them disappear. The LLM path is the primary path for exactly this reason, and evaluating that one for real (accuracy plus self-consistency across repeated calls) needs live Azure credentials this environment doesn't have, so `--mode llm` is written and ready but hasn't been run against production numbers yet.
 
+## Running it yourself
+
+```bash
+git clone <this repo>
+cd tcimpact-poc
+python3 -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+That's it, no API key needed. It opens straight into a working demo mode: the intake structuring, rubric scoring, impact calculations, and funder reporting all run on the same deterministic and heuristic logic that backs the live app, so you can see the actual pipeline produce actual structured output end to end. A banner in the app makes clear when you're in this mode, and the one thing it doesn't do is the live conversational AI (Agent 1's curriculum coaching and Socratic student chat), since that needs a real Azure OpenAI deployment.
+
+If you have your own Azure OpenAI access, add a `.env` (copy `.env.example`) with your endpoint, key, and deployment names, then set `LIVE_LLM=1` before running Streamlit to see the full AI experience, including RAG retrieval over the curriculum library.
+
+Run the test suite with `pytest test_agent2.py test_agent3.py test_agent4.py test_agent1_agent2_adapter.py`. `test_database.py` is a separate legacy smoke-test script with a known gap noted at the top of the file (it predates the current session/student_group schema layer), and isn't part of the app's live code path.
+
 ## Tech stack
 
 Python, Streamlit, LangChain and LangGraph, Azure OpenAI (GPT-4.1, `text-embedding-3-large`), Azure AI Foundry, FAISS, SQLite for the POC with Azure planned for production.
