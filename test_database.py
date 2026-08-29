@@ -2,6 +2,16 @@
 TCImpact Database Tests
 Tests the schema and all database functions with sample data.
 Run with: python test_database.py
+
+KNOWN ISSUE: the teacher section below (insert_teacher) is verified working
+against the current schema.sql. insert_project() is not: it predates the
+schema's session/student_group layer (projects.teacher_id doesn't exist
+in the current schema, projects require session_id and group_id instead)
+and database.py has no insert_session()/insert_student_group() to create
+those rows with. This script's project/survey sections will fail until
+that's addressed. It's a real gap worth fixing, but it's a schema-shape
+change, not a quick patch, and the live Streamlit app doesn't go through
+this code path, so it's flagged here rather than rushed.
 """
 
 import os
@@ -43,7 +53,6 @@ teacher_1_id = insert_teacher(
     country="Brazil",
     grade_band="high",
     num_students_typical=28,
-    lab_used_most="Climate Impacts and Solutions with En-ROADS"
 )
 
 teacher_2_id = insert_teacher(
@@ -55,7 +64,6 @@ teacher_2_id = insert_teacher(
     country="Nigeria",
     grade_band="high",
     num_students_typical=35,
-    lab_used_most="Renewable Energy"
 )
 
 teacher_3_id = insert_teacher(
@@ -67,7 +75,6 @@ teacher_3_id = insert_teacher(
     country="United States",
     grade_band="high",
     num_students_typical=24,
-    lab_used_most="Climate Justice and Equity"
 )
 
 print(f"   ✓ Teacher 1 ID: {teacher_1_id} (Brazil, Track A lab)")
@@ -335,4 +342,3 @@ print("All tests passed! ✓")
 print("=" * 60)
 print(f"\nTest database saved at: tcimpact_test.db")
 print("You can inspect it with: sqlite3 tcimpact_test.db")
-
