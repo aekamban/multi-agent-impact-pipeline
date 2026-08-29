@@ -1,5 +1,5 @@
 """
-socratic_engine.py — TCImpact Agent 1 Socratic Question Selector (v3)
+socratic_engine.py — Agent 1 Socratic Question Selector (v3)
 
 Changes from v2:
 - ALL random calls replaced with deterministic index-based selection.

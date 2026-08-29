@@ -1,6 +1,6 @@
 """
 pipeline_agent1_to_4.py
-TCImpact — Thin Pipeline Wrapper: Agent 1 → 2 → 3 → 4
+Thin Pipeline Wrapper: Agent 1 → 2 → 3 → 4
 =======================================================
 
 A single callable that runs one teacher message through the full pipeline:

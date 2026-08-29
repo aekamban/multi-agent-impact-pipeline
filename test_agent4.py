@@ -1,8 +1,8 @@
 """
 test_agent4.py
-TCImpact — Agent 4 Test Suite
+Agent 4 Test Suite
 
-Tests use realistic inputs drawn from real TCI Jotform submission patterns.
+Tests use realistic inputs drawn from real Jotform submission patterns.
 All tests are deterministic (no LLM calls required).
 
 Run all tests:
@@ -872,7 +872,7 @@ class TestRunAgent4Integration:
 class TestRealisticSubmissions:
 
     def test_ahfachkee_tribal_school_wildfire(self):
-        """Simulates Ahfachkee Day School — tribal school, Wildfires lab, small cohort."""
+        """Simulates Cedar Ridge Tribal School — tribal school, Wildfires lab, small cohort."""
         state = ProjectState(
             raw_input=RawInput(
                 raw_lab_name="wildfire unit",
@@ -881,7 +881,7 @@ class TestRealisticSubmissions:
                 raw_community_partners="Seminole Tribe fire department",
             ),
             teacher_context=TeacherContext(
-                school_name="Ahfachkee Day School",
+                school_name="Cedar Ridge Tribal School",
                 city="Clewiston",
                 state_province="FL",
                 country="US",
@@ -908,9 +908,9 @@ class TestRealisticSubmissions:
         )
         run_agent4(state, jotform_submitted=True)
 
-        assert "Ahfachkee" in state.reporting.funder_summary
+        assert "Cedar Ridge" in state.reporting.funder_summary
         assert state.reporting.map_export_json.get("equity_flag") is True
-        assert state.reporting.jotform_draft[JF_SCHOOL] == "Ahfachkee Day School"
+        assert state.reporting.jotform_draft[JF_SCHOOL] == "Cedar Ridge Tribal School"
 
     def test_hershey_montessori_enroads(self):
         """Simulates Hershey Montessori — En-ROADS lab, above-target carbon reduction."""

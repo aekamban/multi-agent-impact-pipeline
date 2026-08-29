@@ -1,6 +1,6 @@
 """
 agent2.py
-TCImpact — Agent 2: Intake & Structuring
+Agent 2: Intake & Structuring
 
 Takes a messy teacher submission and returns a populated ProjectState.
 
@@ -198,7 +198,7 @@ def _difflib_best_match(normalized: str) -> tuple[str, float]:
 
 def match_lab_name(raw_lab_name: str) -> tuple[str, int, float]:
     """
-    Match an informal lab name to a canonical TCI lab name.
+    Match an informal lab name to a canonical program lab name.
     Safely handles None, empty string, or whitespace-only input.
 
     Strategy (in order):
@@ -770,7 +770,7 @@ def infer_project_type(project_description: Optional[str], lab_name: Optional[st
       - "curriculum" alone is NOT sufficient for "Curriculum integration /
         life cycle analysis"; it must co-occur with "life cycle" or "lifecycle"
         because almost every submission involves curriculum in some sense.
-      - "poster" is kept as a standalone trigger: in TCI submissions a poster
+      - "poster" is kept as a standalone trigger: in real submissions a poster
         is almost always a public-facing awareness artifact.
     """
     text = _safe_lower(project_description, lab_name)
@@ -980,7 +980,7 @@ def process_submission(
 
     if not canonical_name:
         state.add_warning(
-            f"Could not match \"{raw_input.raw_lab_name}\" to any known TCI lab. "
+            f"Could not match \"{raw_input.raw_lab_name}\" to any known program lab. "
             "Manual review required."
         )
 

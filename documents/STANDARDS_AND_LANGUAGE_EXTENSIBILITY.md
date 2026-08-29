@@ -1,4 +1,4 @@
-# TCImpact — Standards & Language Extensibility
+# Standards & Language Extensibility
 # Add this content to CLAUDE_PROJECT_INSTRUCTIONS.md
 # Reference in every Agent 1 build session
 
@@ -16,7 +16,7 @@
 - IB: MYP Sciences, MYP Individuals & Societies,
   DP Environmental Systems & Societies (ESS), DP Geography
 - Rationale for early addition: IB is used at English-speaking
-  international schools in 90+ countries — covers TCI's international
+  international schools in 90+ countries — covers the program's international
   educator base without requiring translation
 
 ### Schema fields supporting extensibility (already in schema_v2)
@@ -50,7 +50,7 @@ Teacher pre-survey captures:
   - Current unit/topic being taught
 
 Agent 1 then:
-1. Identifies which TCI learning lab(s) connect to their subject + standard
+1. Identifies which of the program's learning lab(s) connect to their subject + standard
 2. Suggests specific connection points ("This lab's carbon footprint 
    calculations align with NGSS HS-ESS3-4...")
 3. Drafts a 2-3 sentence "curriculum justification" the teacher can 
@@ -89,10 +89,10 @@ Key specs to map:
 ### POC Scope
 English only.
 
-### TCI's actual language coverage
+### The program's actual language coverage
 Up to 9 languages across the 11 learning labs.
-Priority additions post-POC (guided by TCI usage data):
-  Spanish (largest non-English TCI educator base)
+Priority additions post-POC (guided by usage data):
+  Spanish (largest non-English educator base)
   French (significant African educator base)
   Portuguese (Brazil — Agriculture lab most popular globally)
 
@@ -117,11 +117,11 @@ Structure:
 Language selector in Streamlit UI:
   - Default: "en"
   - Dropdown visible but only "English" enabled for POC
-  - Other languages show "Coming soon" — signals roadmap to TCI
+  - Other languages show "Coming soon" — signals roadmap to the org
 
 ### Pitch language for demo
 "The app is architected for multilingual support from day one.
-Adding Spanish — which would serve TCI's largest non-English
+Adding Spanish — which would serve the program's largest non-English
 educator base — is a content project, not a rebuild. 
 Estimated: 3-4 weeks of translation + testing."
 

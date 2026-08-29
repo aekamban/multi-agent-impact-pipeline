@@ -1,5 +1,5 @@
 """
-TCImpact -- Agent 3 Test Suite (v3)
+Agent 3 Test Suite (v3)
 =====================================
 Style: matches test_agent2.py -- realistic inputs, descriptive class names,
 no mocking of domain logic, no LLM calls anywhere in this file.

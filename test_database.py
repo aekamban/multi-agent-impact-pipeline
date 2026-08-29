@@ -1,5 +1,5 @@
 """
-TCImpact Database Tests
+Database Tests
 Tests the schema and all database functions with sample data.
 Run with: python test_database.py
 
@@ -33,7 +33,7 @@ from database import (
 )
 
 print("=" * 60)
-print("TCImpact Database Tests")
+print("Database Tests")
 print("=" * 60)
 
 # ── SETUP ──────────────────────────────────────────────────────

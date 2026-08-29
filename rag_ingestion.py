@@ -1,5 +1,5 @@
 """
-rag_ingestion.py — TCImpact Agent 1 RAG Pipeline (v3)
+rag_ingestion.py — Agent 1 RAG Pipeline (v3)
 
 Changes from v2:
 - _find_source_dir() now selects the directory that contains the most
@@ -35,17 +35,17 @@ INDEX_DIR = REPO_ROOT / "faiss_index"
 
 # ── Canonical lab manifest ─────────────────────────────────────────────────────
 LAB_FILENAME_MAP: dict[str, str] = {
-    "Final___Agriculture____TCI_Learning_Lab__NEW_EDITS_6_25.txt": "Agriculture & Climate Change",
-    "Final___Climate_Impacts_and_Solutions_with_En-Roads____pptx.txt": "En-ROADS Climate Modeling",
-    "Final____INVASIVE_SPECIES____.txt":                              "Invasive Species",
-    "Final____SEA_LEVEL_RISE__.txt":                                  "Sea Level Rise",
-    "_Final_Climate_Change___Health_Learning_Lab_.txt":               "Climate Change & Health",
-    "__Civics_Climate_Action___TCI_Learning_Lab__.txt":               "Civics & Climate Action",
-    "__Climate_Justice_and_Equity___Final_Learning_Lab_.txt":         "Climate Justice & Equity",
-    "__TCI_x_MEIF___Climate_Migration_Learning_Lab__.txt":            "Climate Migration",
-    "___Floods___Droughts____A_TCI_Learning_Lab_.txt":                "Floods & Droughts",
-    "___WILDFIRES____Final_Learning_Lab___Teacher_Guide.txt":         "Wildfires",
-    "____RENEWABLE_ENERGY____TCI_Learning_Lab___.txt":                "Renewable Energy",
+    "agriculture_and_climate_change_learning_lab.txt":     "Agriculture & Climate Change",
+    "climate_impacts_and_solutions_with_en_roads.txt":     "En-ROADS Climate Modeling",
+    "invasive_species_learning_lab.txt":                   "Invasive Species",
+    "sea_level_rise_learning_lab.txt":                     "Sea Level Rise",
+    "climate_change_and_health_learning_lab.txt":          "Climate Change & Health",
+    "civics_climate_action_learning_lab.txt":              "Civics & Climate Action",
+    "climate_justice_and_equity_learning_lab.txt":         "Climate Justice & Equity",
+    "climate_migration_learning_lab.txt":                  "Climate Migration",
+    "floods_and_droughts_learning_lab.txt":                "Floods & Droughts",
+    "wildfires_learning_lab_teacher_guide.txt":            "Wildfires",
+    "renewable_energy_learning_lab.txt":                   "Renewable Energy",
 }
 
 EXPECTED_COUNT = 11

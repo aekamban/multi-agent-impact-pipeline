@@ -1,6 +1,6 @@
 """
 test_agent1_agent2_adapter.py
-TCImpact — Agent 1 → Agent 2 Adapter Test Suite
+Agent 1 → Agent 2 Adapter Test Suite
 
 All tests are deterministic (no LLM calls required).
 They use realistic simulated Agent 1 output drawn from real metadata
@@ -680,7 +680,7 @@ class TestPipelineWrapper:
     def test_teacher_context_passed_through_pipeline(self):
         from pipeline_agent1_to_4 import run_agent1_to_4_pipeline
         ctx = TeacherContext(
-            school_name="Ahfachkee Day School",
+            school_name="Cedar Ridge Tribal School",
             city="Clewiston",
             country="US",
             school_type=SchoolType.TRIBAL,
@@ -690,7 +690,7 @@ class TestPipelineWrapper:
             teacher_message="wildfire mapping project",
             teacher_context=ctx,
         )
-        assert state.teacher_context.school_name == "Ahfachkee Day School"
+        assert state.teacher_context.school_name == "Cedar Ridge Tribal School"
         assert state.teacher_context.school_type == SchoolType.TRIBAL
 
 

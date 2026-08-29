@@ -1,4 +1,4 @@
-# TCImpact: Multi-Agent Impact Measurement System
+# Multi-Agent Impact Measurement Pipeline
 
 **A four-agent LLM system (LangChain, Azure OpenAI GPT-4.1, RAG over program curriculum) that turns free-text program submissions from an international climate-education nonprofit into funder-ready, evidence-tier impact reporting, replacing a year-end form nobody filled out on time.**
 

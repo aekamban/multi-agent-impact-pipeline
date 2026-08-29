@@ -1,14 +1,14 @@
--- TCImpact POC Database Schema v2
--- Longitudinal learning companion for TCI teachers and students
+-- Multi-Agent Impact Pipeline: Database Schema v2
+-- Longitudinal learning companion for program teachers and students
 -- Supports three phases: Planning → Implementation → Analysis
--- Updated: Day 2 based on real Jotform data analysis + Kate Keefer input
+-- Updated: Day 2 based on real intake-form data analysis and program staff input
 -- 
 -- KEY DESIGN DECISIONS:
 -- 1. Sessions are the central unit (one teacher + one lab + one academic year)
 -- 2. Planning data is mutable until implementation starts, then locks
 -- 3. Student groups are anonymous — linked to sessions via classroom code only
 -- 4. Upsert pattern used throughout planning phase to avoid duplicate records
--- 5. Map export JSON built into projects for Moore Foundation integration
+-- 5. Map export JSON built into projects for the organization's public impact map
 
 -- ─────────────────────────────────────────
 -- LOOKUP TABLES
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS learning_labs (
     track TEXT NOT NULL CHECK(track IN ('A', 'B')),
     carbon_target_lbs REAL,
     thematic_topic TEXT,
-    -- Real usage frequency from Jotform data (informs default suggestions)
+    -- Example usage frequency (informs default suggestions)
     usage_count INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -30,16 +30,16 @@ CREATE TABLE IF NOT EXISTS learning_labs (
 INSERT OR IGNORE INTO learning_labs 
     (lab_name, track, carbon_target_lbs, thematic_topic, usage_count) 
 VALUES
-    ('Climate Impacts and Solutions with En-ROADS','A',10000,'Climate Solutions & Modeling',4),
-    ('Agriculture and Climate Change','B',NULL,'Food & Land Use',17),
-    ('Civics Climate Action','B',NULL,'Policy & Civic Action',12),
-    ('Climate Justice and Equity','B',NULL,'Justice & Equity',10),
-    ('Renewable Energy','B',NULL,'Energy',7),
-    ('Wildfires','B',NULL,'Climate Impacts',4),
-    ('Floods and Droughts','B',NULL,'Climate Impacts',3),
-    ('Sea Level Rise','B',NULL,'Climate Impacts',3),
+    ('Climate Impacts and Solutions with En-ROADS','A',10000,'Climate Solutions & Modeling',6),
+    ('Agriculture and Climate Change','B',NULL,'Food & Land Use',10),
+    ('Civics Climate Action','B',NULL,'Policy & Civic Action',8),
+    ('Climate Justice and Equity','B',NULL,'Justice & Equity',7),
+    ('Renewable Energy','B',NULL,'Energy',5),
+    ('Wildfires','B',NULL,'Climate Impacts',3),
+    ('Floods and Droughts','B',NULL,'Climate Impacts',2),
+    ('Sea Level Rise','B',NULL,'Climate Impacts',2),
     ('Invasive Species','B',NULL,'Ecosystems',1),
-    ('Climate Change and Health','B',NULL,'Health',0),
+    ('Climate Change and Health','B',NULL,'Health',1),
     ('Climate Migration','B',NULL,'Justice & Equity',0);
 
 -- Lab name aliases from real Jotform submissions
@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS teachers (
     name_hash TEXT NOT NULL UNIQUE,
     email_hash TEXT NOT NULL UNIQUE,
     school_name TEXT,
-    -- Demographics TCI wants but doesn't currently collect systematically
+    -- Demographics the org wants but doesn't currently collect systematically
     school_type TEXT CHECK(school_type IN (
         'public','private','charter','montessori',
         'community_org','tribal_school','international','other','unknown'
@@ -127,9 +127,9 @@ CREATE TABLE IF NOT EXISTS teachers (
     )) DEFAULT 'unknown',
     subject_area TEXT,              -- e.g. "Environmental Science, Biology"
     num_students_typical INTEGER,
-    -- TCI relationship
-    tci_educator_id TEXT,           -- if TCI provides one in future
-    years_using_tci INTEGER DEFAULT 0,
+    -- Program relationship
+    program_educator_id TEXT,       -- if the org provides one in future
+    years_in_program INTEGER DEFAULT 0,
     curriculum_standard TEXT DEFAULT 'NGSS',
     preferred_language TEXT DEFAULT 'en',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     teacher_id INTEGER NOT NULL REFERENCES teachers(id),
     lab_id INTEGER REFERENCES learning_labs(id),
-    classroom_code TEXT UNIQUE NOT NULL,  -- e.g. "TCI-7X4K"
+    classroom_code TEXT UNIQUE NOT NULL,  -- e.g. "PGM-7X4K"
     academic_year TEXT,                   -- e.g. "2026-27"
     curriculum_standard TEXT DEFAULT 'NGSS',
     session_language TEXT DEFAULT 'en',
@@ -268,7 +268,7 @@ CREATE TABLE IF NOT EXISTS projects (
     funder_summary_text TEXT,
     logic_model_json TEXT,
 
-    -- Moore Foundation map export
+    -- Partner map export
     map_export_json TEXT,           -- {lat, lng, project_type, lab, grade_band, ...}
 
     -- Follow-up
@@ -357,7 +357,7 @@ CREATE TABLE IF NOT EXISTS impact_summaries (
     -- Generated artifacts
     summary_json TEXT,
     logic_model_text TEXT,
-    map_export_json TEXT,           -- all projects in Moore Foundation format
+    map_export_json TEXT,           -- all projects in partner map format
     generated_by TEXT DEFAULT 'agent-4'
 );
 

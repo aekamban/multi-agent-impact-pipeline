@@ -1,6 +1,6 @@
 """
 smoke_agent4.py
-TCImpact — End-to-End Pipeline Smoke Test
+End-to-End Pipeline Smoke Test
 ==========================================
 
 Runs three realistic submissions through the full agent pipeline:
@@ -8,7 +8,7 @@ Runs three realistic submissions through the full agent pipeline:
              → Agent 3 (run_agent3)
              → Agent 4 (run_agent4)
 
-All three submissions are drawn from real TCI Jotform rows.
+All three submissions are drawn from realistic example Jotform rows.
 
 Usage:
     python smoke_agent4.py              # offline, deterministic only
@@ -308,7 +308,7 @@ def run_pipeline(label: str, raw: RawInput, ctx: TeacherContext,
 # ─────────────────────────────────────────
 
 def main():
-    print(bold("\nTCImpact — End-to-End Pipeline Smoke Test"))
+    print(bold("\nEnd-to-End Pipeline Smoke Test"))
     print(bold("Agents: 2 → 3 → 4  |  Real Jotform data\n"))
 
     scenarios = [

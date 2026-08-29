@@ -1,8 +1,8 @@
 """
 test_agent2.py
-TCImpact — Agent 2 Test Suite
+Agent 2 Test Suite
 
-Tests use realistic messy inputs drawn from real TCI Jotform submission patterns.
+Tests use realistic messy inputs drawn from real Jotform submission patterns.
 
 Test gating:
     - All pure-Python tests run always (no env vars needed)
@@ -402,7 +402,7 @@ class TestExtractPartnersHeuristic:
         assert names_lower.count("green alliance") <= 1
 
     def test_real_submission_narrative(self):
-        """Simulates a realistic multi-partner narrative from a TCI submission."""
+        """Simulates a realistic multi-partner narrative from a real submission."""
         narrative = (
             "Our students partnered with Harvest Hands Community Farm and the "
             "Norwalk Public Library. We also collaborated with a local nonprofit "
@@ -589,7 +589,7 @@ class TestProcessSubmission:
     # ── Real submission simulations ──────────────────────────────────
 
     def test_real_submission_ahfachkee(self):
-        """Simulates Ahfachkee School submission (tribal school, Wildfires lab)."""
+        """Simulates Cedar Ridge Tribal School submission (tribal school, Wildfires lab)."""
         raw = RawInput(
             raw_lab_name="wildfire unit",
             raw_project_description="Students mapped fire risk zones near the reservation.",
@@ -599,7 +599,7 @@ class TestProcessSubmission:
             submission_source="jotform_import",
         )
         ctx = TeacherContext(
-            school_name="Ahfachkee Day School",
+            school_name="Cedar Ridge Tribal School",
             city="Clewiston",
             state_province="FL",
             country="US",

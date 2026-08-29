@@ -1,5 +1,5 @@
 """
-TCImpact Database Layer
+Database Layer
 Handles all SQLite interactions for the POC.
 No ORM — plain sqlite3 for simplicity and portability.
 """

@@ -1,6 +1,6 @@
 """
 agent1_agent2_adapter.py
-TCImpact — Handoff Adapter: Agent 1 → Agent 2
+Handoff Adapter: Agent 1 → Agent 2
 ==============================================
 
 Converts Agent 1 output (response_text, metadata) into a RawInput object

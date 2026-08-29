@@ -1,5 +1,5 @@
 """
-standards_router.py — TCImpact Agent 1 Standards Lookup Engine (v3)
+standards_router.py — Agent 1 Standards Lookup Engine (v3)
 
 Changes from v2:
 - extract_target_lab() parses lab name from free text so run_agent1()

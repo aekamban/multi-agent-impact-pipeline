@@ -1,9 +1,9 @@
 {
   "metadata": {
     "version": "1.1",
-    "description": "TCImpact Socratic Question Bank for Agent 1 student coaching",
+    "description": "Socratic Question Bank for Agent 1 student coaching",
     "philosophy": "Never tell students what to do. Ask questions that help them discover how to improve their own project. Empowerment over instruction.",
-    "tci_alignment": "Matches TCI's core empowerment philosophy from the learning labs",
+    "program_alignment": "Matches the program's core empowerment philosophy from the learning labs",
     "usage": "Agent 1 selects questions using the question engine logic below",
     "last_updated": "Day 2",
     "notes": [

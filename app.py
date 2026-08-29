@@ -1,7 +1,7 @@
 """
-app.py — TCImpact Streamlit UI
+app.py — Streamlit UI
 Wires Agent 1 → 2 → 3 → 4 pipeline with a demo-ready interface.
-Demo audience: Kate Keefer, TCI Director of Operations (non-technical).
+Demo audience: the organization's Director of Operations (non-technical).
 
 Tabs:
   1. Teacher Mode  — full pipeline, shows structured intake + funder summary
@@ -16,13 +16,13 @@ import streamlit as st
 
 # ─── Page config must be first Streamlit call ─────────────────────────────────
 st.set_page_config(
-    page_title="TCImpact",
+    page_title="Impact Companion",
     page_icon="🌱",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
-# ─── Custom CSS — TCI brand system, light theme ───────────────────────────────
+# ─── Custom CSS — brand system, light theme ───────────────────────────────
 st.markdown("""
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -60,13 +60,13 @@ st.markdown("""
   [data-testid="stHeader"] { background-color: #FFFFFF !important; border-bottom: 1px solid #E5E7EB !important; }
 
   /* ── Wordmark ── */
-  .tci-wordmark {
+  .impact-wordmark {
     font-family: 'Inter', sans-serif;
     font-size: 1.5rem; font-weight: 700; color: #2F7F84;
     letter-spacing: -0.3px; margin: 0; line-height: 1.2;
     padding-top: 4px;
   }
-  .tci-tagline {
+  .impact-tagline {
     font-family: 'Inter', sans-serif;
     font-size: 0.7rem; color: #6B7280; font-weight: 400;
     letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px;
@@ -80,7 +80,7 @@ st.markdown("""
     font-size: 0.85rem; color: #92400E; margin-bottom: 16px;
   }
 
-  /* ── Tabs — TCI teal accent ── */
+  /* ── Tabs — teal accent ── */
   button[data-baseweb="tab"] {
     font-weight: 500 !important;
     font-size: 0.9rem !important;
@@ -156,7 +156,7 @@ st.markdown("""
      CUSTOM CONTENT COMPONENTS
   ═══════════════════════════════════════════ */
 
-  /* ── Section labels — TCI green rule above ── */
+  /* ── Section labels — green rule above ── */
   .section-label {
     font-family: 'Inter', sans-serif;
     font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em;
@@ -210,7 +210,7 @@ st.markdown("""
     font-weight: 500; margin: 3px 4px 3px 0;
   }
 
-  /* ── Funder summary — TCI teal box ── */
+  /* ── Funder summary — teal box ── */
   .funder-box {
     font-family: 'Inter', sans-serif;
     background: #2F7F84; color: #FFFFFF; border-radius: 12px;
@@ -306,7 +306,7 @@ JOTFORM_KEY_LABELS: dict = {
 
 _JOTFORM_FALLBACK_PRIVACY = (
     "Sensitive personal data (name, email, phone, address), student media, "
-    "upload evidence, and consent must be completed directly in TCI's official "
+    "upload evidence, and consent must be completed directly in the organization's official "
     "Jotform for privacy compliance. This system does not collect or store them."
 )
 
@@ -356,8 +356,8 @@ LIVE_LLM = os.getenv("LIVE_LLM", "").strip() == "1"
 col_logo, _ = st.columns([3, 7])
 with col_logo:
     st.markdown("""
-    <p class="tci-wordmark">TCImpact</p>
-    <p class="tci-tagline">The Climate Initiative · Learning Lab Companion</p>
+    <p class="impact-wordmark">Impact Companion</p>
+    <p class="impact-tagline">Climate Education Program Companion</p>
     """, unsafe_allow_html=True)
 
 st.markdown("---")
@@ -410,7 +410,7 @@ with tab_teacher:
 
     # Demo toggle: pass jotform_submitted=True to agent4 to unlock map export
     jotform_submitted_demo = st.checkbox(
-        "Preview as Jotform-submitted (unlocks Moore Foundation map export for demo)",
+        "Preview as Jotform-submitted (unlocks the public impact map export for demo)",
         value=False,
         key="jotform_submitted_demo",
     )
@@ -425,7 +425,7 @@ with tab_teacher:
     st.markdown(
         '<div class="privacy-note"><strong>Privacy:</strong> '
         "Please do not include student names, photos, videos, email addresses, or home addresses. "
-        "This tool is designed for project reporting only. Personal details and media should be submitted directly through TCI's official Jotform.</div>",
+        "This tool is designed for project reporting only. Personal details and media should be submitted directly through the organization's official Jotform.</div>",
         unsafe_allow_html=True,
     )
 
@@ -541,7 +541,7 @@ with tab_teacher:
                     if conf is not None and conf < 0.8:
                         st.warning(
                             f"We had difficulty matching your learning lab name (confidence: {conf:.0%}). "
-                            "Consider clarifying which TCI learning lab you are running."
+                            "Consider clarifying which learning lab you are running."
                         )
 
                     pills_html = ""
@@ -627,7 +627,7 @@ with tab_teacher:
                     with st.expander("Jotform submission draft", expanded=False):
                         st.caption(
                             "This draft was prepared from your project information. "
-                            "Review each field, then complete your official submission at TCI's Jotform link. "
+                            "Review each field, then complete your official submission at the organization's Jotform link. "
                             "Personal details, photos, and consent must be added directly in the official form."
                         )
                         if isinstance(jd, dict):
@@ -654,8 +654,8 @@ with tab_teacher:
                                     "Name": "Teacher name",
                                     "Email": "Email address",
                                     "Phone Number": "Phone number",
-                                    "Mailing address, for shipping your free TCI merch:": "Mailing address",
-                                    "By submitting this form, you agree that TCI can use this material for promotion, marketing, and dissemination.": "Consent declaration",
+                                    "Mailing address, for shipping your free program merchandise:": "Mailing address",
+                                    "By submitting this form, you agree that the organization can use this material for promotion, marketing, and dissemination.": "Consent declaration",
                                 }
                                 for bf in blank_fields:
                                     lbl = _OMIT_LABELS.get(bf) or (bf[:60] + "…" if len(bf) > 60 else bf)

@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "title": "TCImpact Standards Alignment Database",
-    "description": "Multi-system curriculum standards mapped to all 11 TCI Learning Labs. Used by Agent 1 curriculum alignment mode.",
+    "title": "Standards Alignment Database",
+    "description": "Multi-system curriculum standards mapped to all 11 program Learning Labs. Used by Agent 1 curriculum alignment mode.",
     "version": "1.0.0",
     "generated_date": "2026-03-04",
     "ai_knowledge_cutoff": "GPT-5.2, March 4 2026. Standards reflect best available knowledge at that date only.",
@@ -26,7 +26,7 @@
     },
     "maintenance_schedule": {
       "frequency": "Annual \u2014 review each August before the new academic year starts",
-      "owner": "TCI Data Scientist or designated educator reviewer",
+      "owner": "Program data scientist or designated educator reviewer",
       "estimated_time": "2-4 hours per full review cycle",
       "what_to_check": {
         "US": [
@@ -63,7 +63,7 @@
         "4. Add an entry to the change_log array below",
         "5. Run: python3 tests/test_standards_alignment.py to verify all mappings intact",
         "6. Commit with: git commit -m 'standards: annual review YYYY-MM'",
-        "7. Notify TCI team that standards database has been updated"
+        "7. Notify the program team that standards database has been updated"
       ],
       "change_log": [
         {
@@ -82,13 +82,13 @@
         "Cambridge International: Primary, Lower Secondary, IGCSE, AS/A Level, Global Perspectives"
       ],
       "systems_planned_next": [
-        "Australian ACARA (high priority \u2014 significant TCI educator base)",
+        "Australian ACARA (high priority \u2014 significant educator base)",
         "Canadian Provincial: BC and Ontario curricula",
         "South African CAPS",
         "French Baccalaur\u00e9at",
         "Welsh Curriculum for Wales (separate from England \u2014 already using UK table incorrectly if applied to Wales)"
       ],
-      "languages": "English only. POC scope. TCI labs available in up to 9 languages \u2014 multilingual standards alignment planned for production.",
+      "languages": "English only. POC scope. Labs available in up to 9 languages \u2014 multilingual standards alignment planned for production.",
       "labs_covered": 11,
       "grade_range": "Ages 5-19 (Primary through pre-university across all systems)"
     }

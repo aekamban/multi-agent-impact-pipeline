@@ -1,6 +1,6 @@
 """
 project_state.py
-TCImpact — Shared Agent Handoff Object
+Shared Agent Handoff Object
 
 ProjectState is the canonical object passed between agents.
 Each agent writes only to its own section and never mutates others.
@@ -123,7 +123,7 @@ class RubricScores(BaseModel):
     depth: Optional[float] = None          # depth of engagement / behavior change
     equity: Optional[float] = None         # serves underserved communities
     sustainability: Optional[float] = None # action continues beyond class
-    fidelity: Optional[float] = None       # alignment to TCI lab framework
+    fidelity: Optional[float] = None       # alignment to program lab framework
 
     @property
     def dimensions(self) -> list[Optional[float]]:
@@ -230,7 +230,7 @@ class ImpactMetrics(BaseModel):
     # Track A — En-ROADS carbon
     co2_reduction_lbs: Optional[float] = None
     co2_reduction_methodology: str = ""    # step-by-step shown to students
-    co2_target_met: Optional[bool] = None  # vs 10,000 lb TCI target
+    co2_target_met: Optional[bool] = None  # vs 10,000 lb program target
     epa_emissions_factor_used: str = ""    # e.g. "0.386 kg CO2/kWh (EPA 2023)"
 
     # Track B — Community impact
@@ -258,7 +258,7 @@ class Reporting(BaseModel):
     logic_model_text: str = ""             # human-readable rendering (from logic_model.to_text())
     jotform_draft: dict[str, str] = Field(default_factory=dict)  # keyed by Jotform column name
     funder_summary: str = ""               # grant-ready narrative paragraph
-    map_export_json: dict[str, Any] = Field(default_factory=dict)  # Moore Foundation format
+    map_export_json: dict[str, Any] = Field(default_factory=dict)  # Partner map format
 
 
 class DbIds(BaseModel):
@@ -290,7 +290,7 @@ class Timestamps(BaseModel):
 
 class ProjectState(BaseModel):
     """
-    Canonical handoff object between TCImpact agents.
+    Canonical handoff object between agents.
     One ProjectState per teacher project submission.
     Records remain mutable throughout all phases — projects pivot, that's expected.
 

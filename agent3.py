@@ -1,5 +1,5 @@
 """
-TCImpact — Agent 3: Impact Calculator
+Agent 3: Impact Calculator
 ======================================
 Reads:  state.structured_intake  (StructuredIntake, written by Agent 2)
 Writes: state.impact_metrics     (ImpactMetrics, consumed by Agent 4)
@@ -25,9 +25,9 @@ Key field type notes (project_state.ImpactMetrics):
   partnership_count       int              -- default 0 (not Optional)
 
 Track routing (mirrors Agent 2 assignment):
-  Track A -- En-ROADS lab only (~4/46 real submissions)
+  Track A -- En-ROADS lab only (a small minority of real submissions)
              CO2 reduction math with EPA emissions factors
-  Track B -- All other 10 labs (~42/46 real submissions)
+  Track B -- All other 10 labs (the large majority of real submissions)
              Reach, behavior change proxy, community, policy metrics
 """
 
