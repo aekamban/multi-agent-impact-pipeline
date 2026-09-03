@@ -44,7 +44,7 @@ Both are fixed now. Precision on the gold set went from 0 to 0.5 and recall from
 
 ```bash
 git clone <this repo>
-cd tcimpact-poc
+cd multi-agent-impact-pipeline
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 streamlit run app.py
